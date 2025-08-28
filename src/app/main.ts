@@ -9,20 +9,36 @@ function qs<T extends Element>(s: string) {
   return el as T;
 }
 
-const COLS = 30, ROWS = 20, CELL = 30;
+const COLS = 20, ROWS = 15, CELL = 30;
 const board = new Board(COLS, ROWS);
 const state = new GameState(board, { x: Math.floor(COLS/3), y: Math.floor(ROWS/2) }, 'right', 140);
 const renderer = new SvgRenderer(qs('#game'), COLS, ROWS, CELL);
 
 const scoreEl = qs<HTMLSpanElement>('#score');
+const highScoreEl = qs<HTMLSpanElement>('#highScore');
 const overlay = qs<HTMLDivElement>('#overlay');
+
+// High score management
+let highScore = parseInt(localStorage.getItem('snakeHighScore') || '0');
+highScoreEl.textContent = String(highScore);
+
+function updateHighScore(score: number) {
+  if (score > highScore) {
+    highScore = score;
+    highScoreEl.textContent = String(highScore);
+    localStorage.setItem('snakeHighScore', String(highScore));
+  }
+}
 
 function showOverlay(msg: string) {
   overlay.textContent = msg;
   overlay.style.display = 'flex';
+  overlay.classList.add('show');
 }
+
 function hideOverlay() {
   overlay.style.display = 'none';
+  overlay.classList.remove('show');
 }
 
 let paused = true;
@@ -32,12 +48,13 @@ function loop() {
   if (paused || !state.isAlive()) return;
   const now = Date.now();
   state.step(now);
-  renderer.renderFoods(state.getFood());   // draw food first
+  renderer.renderFoods(state.getFood());  
   renderer.renderSnake(state.getSnakeBody());
   scoreEl.textContent = String(state.getScore());
 
   if (!state.isAlive()) {
-    showOverlay('Game Over — Press Space or Click to Restart');
+    updateHighScore(state.getScore());
+    showOverlay('Game Over — Press Space to Restart');
     return;
   }
 
@@ -71,7 +88,7 @@ function restart() {
   renderer.renderFoods(state.getFood());
   renderer.renderSnake(state.getSnakeBody());
   scoreEl.textContent = '0';
-  showOverlay('Press Space or Click to Start');
+  showOverlay('Press Space to Start');
 }
 
 window.addEventListener('keydown', (e) => {
@@ -92,4 +109,4 @@ window.addEventListener('keydown', (e) => {
 
 renderer.renderFoods(state.getFood());
 renderer.renderSnake(state.getSnakeBody());
-showOverlay('Press Space or Click to Start');
+showOverlay('Press Space to Start');

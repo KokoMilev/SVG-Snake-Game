@@ -4,47 +4,21 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Vite + TS</title>
+    <title>Snake Game</title>
   </head>
   <body>
-    <style>
-      html, body { height: 100%; }
-      body {
-        margin: 0;
-        box-sizing: border-box;
-        min-height: 100vh;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        gap: 12px;
-        padding: 16px;
-        background: #fff;
-      }
-      #overlay {
-        position: absolute;
-        inset: 0;
-        display: none;
-        align-items: center;
-        justify-content: center;
-        font: 700 24px/1.2 system-ui, sans-serif;
-        background: rgba(255, 255, 255, 0.7);
-      }
-      #stage { position: relative; width: min(80vw, 80vh); }
-      #game { width: 100%; height: auto; }
-      #hud { width: 100%; text-align: center; font: 16px/1.4 system-ui, sans-serif; }
-    </style>
-
-    <div
-      id="hud"
-      style="display: flex; gap: 12px; align-items: center; margin: 8px 0"
-    >
-      <div>Score: <span id="score">0</span></div>
+    <link rel="stylesheet" href="/src/app/styles.css">
+    <div id="hud">
+      <div id="scoreBox">
+        <div>Score: <span id="score">0</span></div>
+        <div>High Score: <span id="highScore">0</span></div>
+      </div>
     </div>
 
     <div id="stage">
       <div id="overlay"></div>
       <div id="game"></div>
+      <div id="foreground"></div>
     </div>
 
     <script type="module" src="/src/app/main.ts"></script>
