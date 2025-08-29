@@ -7,7 +7,7 @@
     <title>Snake Game</title>
   </head>
   <body>
-    <link rel="stylesheet" href="/src/app/styles.css">
+    <link rel="stylesheet" href="/src/app/styles/main.css">
     <div id="hud">
       <div id="scoreBox">
         <div>Score: <span id="score">0</span></div>
@@ -20,6 +20,188 @@
       <div id="overlay"></div>
       <div id="game"></div>
       <div id="foreground"></div>
+    </div>
+
+    <!-- Start Screen Overlay -->
+    <div id="startScreen" class="start-overlay">
+      <div class="start-content">
+        <div class="start-header">
+          <h1>🐍 Snake Game</h1>
+          <p class="subtitle">Classic arcade fun with modern twists!</p>
+        </div>
+        
+        <div class="start-buttons">
+          <button id="startGameBtn" class="btn btn-primary">🎮 Start Game</button>
+          <button id="rulesBtn" class="btn btn-secondary">📖 Rules & Tips</button>
+        </div>
+        
+        <div class="start-footer">
+          <p>Press <kbd>Space</kbd> to start quickly</p>
+          <p>Press <kbd>ESC</kbd> anytime for menu</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Game Over Overlay -->
+    <div id="gameOverScreen" class="game-over-overlay">
+      <div class="game-over-content">
+        <div class="game-over-header">
+          <h1></h1>Game Over</h1>
+          <div class="score-display">
+            <div class="final-score">Final Score: <span id="finalScore">0</span></div>
+            <div class="high-score-display">High Score: <span id="gameOverHighScore">0</span></div>
+          </div>
+        </div>
+        
+        <div class="game-over-buttons">
+          <button id="restartBtn" class="btn btn-primary">Play Again</button>
+          <button id="mainMenuBtn" class="btn btn-secondary">Main Menu</button>
+        </div>
+        
+        <div class="game-over-footer">
+          <p>Press <kbd>Space</kbd> to play again quickly</p>
+          <p>Press <kbd>ESC</kbd> for rules & tips</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Menu overlay -->
+    <div id="menu" class="menu-overlay">
+      <div class="menu-content">
+        <div class="menu-header">
+          <h1>Snake Game</h1>
+          <button id="closeMenu" class="close-btn">×</button>
+        </div>
+        
+        <div class="menu-tabs">
+          <button class="tab-btn active" data-tab="rules">Rules</button>
+          <button class="tab-btn" data-tab="controls">Controls</button>
+          <button class="tab-btn" data-tab="foods">Food Guide</button>
+        </div>
+        
+        <div class="tab-content active" id="rules">
+          <h2>How to Play</h2>
+          <p>Control the snake to eat food and grow longer. Avoid hitting the walls or your own tail!</p>
+          
+          <h3>Objective</h3>
+          <ul>
+            <li>Eat food to grow and increase your score</li>
+            <li>Try to achieve the highest score possible</li>
+            <li>Don't crash into walls or yourself</li>
+          </ul>
+          
+          <h3>Game Mechanics</h3>
+          <ul>
+            <li>The snake moves continuously in the current direction</li>
+            <li>Use arrow keys or WASD to change direction</li>
+            <li>Press Space to pause/resume or restart after game over</li>
+            <li>Press ESC to open this menu</li>
+          </ul>
+        </div>
+        
+        <div class="tab-content" id="controls">
+          <h2>Controls</h2>
+          <div class="control-grid">
+            <div class="control-item">
+              <span class="key">↑</span>
+              <span class="key">W</span>
+              <span class="description">Move Up</span>
+            </div>
+            <div class="control-item">
+              <span class="key">↓</span>
+              <span class="key">S</span>
+              <span class="description">Move Down</span>
+            </div>
+            <div class="control-item">
+              <span class="key">←</span>
+              <span class="key">A</span>
+              <span class="description">Move Left</span>
+            </div>
+            <div class="control-item">
+              <span class="key">→</span>
+              <span class="key">D</span>
+              <span class="description">Move Right</span>
+            </div>
+            <div class="control-item">
+              <span class="key">Space</span>
+              <span class="description">Pause/Resume/Restart</span>
+            </div>
+            <div class="control-item">
+              <span class="key">ESC</span>
+              <span class="description">Open Menu</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="tab-content" id="foods">
+          <h2>Food Guide</h2>
+          <div class="food-grid">
+            <div class="food-item">
+              <span class="food-emoji">🍒</span>
+              <div class="food-info">
+                <h3>Cherry</h3>
+                <p>Basic food - 100 points</p>
+                <p class="effect">No special effects</p>
+              </div>
+            </div>
+            
+            <div class="food-item">
+              <span class="food-emoji">🍄</span>
+              <div class="food-info">
+                <h3>Mushroom</h3>
+                <p>350 points</p>
+                <p class="effect">🔄 Inverts controls for 30 seconds</p>
+              </div>
+            </div>
+            
+            <div class="food-item">
+              <span class="food-emoji">🍕</span>
+              <div class="food-info">
+                <h3>Pizza</h3>
+                <p>400 points</p>
+                <p class="effect">⚡ Increases speed by 15%</p>
+              </div>
+            </div>
+            
+            <div class="food-item">
+              <span class="food-emoji">🍌</span>
+              <div class="food-info">
+                <h3>Banana</h3>
+                <p>120 points</p>
+                <p class="effect">🐌 Decreases speed by 20%</p>
+              </div>
+            </div>
+            
+            <div class="food-item">
+              <span class="food-emoji">🥥</span>
+              <div class="food-info">
+                <h3>Coconut</h3>
+                <p>150 points</p>
+                <p class="effect">🛡️ Provides shield for 20 seconds</p>
+              </div>
+            </div>
+            
+            <div class="food-item">
+              <span class="food-emoji">🍍</span>
+              <div class="food-info">
+                <h3>Pineapple</h3>
+                <p>200 points</p>
+                <p class="effect">⚡ Double points for 15 seconds</p>
+              </div>
+            </div>
+          </div>
+          
+          <div class="food-tips">
+            <h3>💡 Tips</h3>
+            <ul>
+              <li>Shield protects you from crashes and negative effects</li>
+              <li>Double points multiplies all food values</li>
+              <li>Speed changes stack with each food eaten</li>
+              <li>Plan your route to avoid getting trapped!</li>
+            </ul>
+          </div>
+        </div>
+      </div>
     </div>
 
     <script type="module" src="/src/app/main.ts"></script>

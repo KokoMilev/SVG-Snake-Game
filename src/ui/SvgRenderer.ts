@@ -92,8 +92,8 @@ export class SvgRenderer {
       .attr('fill', 'none')
       .attr('stroke', 'rgba(255, 255, 255, 0.8)')
       .attr('stroke-width', 2)
-      .attr('rx', 4)
-      .attr('ry', 4);
+      .attr('rx', 6)
+      .attr('ry', 6);
     
     for (let x = 0; x <= this.cols; x++) {
       this.grid.append('line').attr('x1', x*this.cell).attr('y1', 0).attr('x2', x*this.cell).attr('y2', h)
@@ -130,8 +130,8 @@ export class SvgRenderer {
       const x = point.x * this.cell;
       const y = point.y * this.cell;
       
-      const segmentSize = this.cell + 4;
-      const offset = 2;
+      const segmentSize = this.cell;
+      const offset = 1;
       
       this.snake.append('rect')
         .attr('class', isHead ? 'snakeHead' : 'snakeBody')
@@ -139,8 +139,8 @@ export class SvgRenderer {
         .attr('y', y - offset)
         .attr('width', segmentSize)
         .attr('height', segmentSize)
-        .attr('rx', 8)
-        .attr('ry', 8)
+        .attr('rx', 6)
+        .attr('ry', 6)
         .attr('fill', isHead ? 'url(#snakeHead)' : 'url(#snakeBody)')
         .attr('stroke', 'rgba(0,0,0,0.2)')
         .attr('stroke-width', 1)
@@ -157,24 +157,24 @@ export class SvgRenderer {
       
       switch (direction) {
         case 'right':
-          leftEyeX = headX + 8; leftEyeY = headY - 8;
-          rightEyeX = headX + 8; rightEyeY = headY + 8;
+          leftEyeX = headX + 6; leftEyeY = headY - 6;
+          rightEyeX = headX + 6; rightEyeY = headY + 6;
           break;
         case 'left':
-          leftEyeX = headX - 8; leftEyeY = headY - 8;
-          rightEyeX = headX - 8; rightEyeY = headY + 8;
+          leftEyeX = headX - 6; leftEyeY = headY - 6;
+          rightEyeX = headX - 6; rightEyeY = headY + 6;
           break;
         case 'up':
-          leftEyeX = headX - 8; leftEyeY = headY - 8;
-          rightEyeX = headX + 8; rightEyeY = headY - 8;
+          leftEyeX = headX - 6; leftEyeY = headY - 6;
+          rightEyeX = headX + 6; rightEyeY = headY - 6;
           break;
         case 'down':
-          leftEyeX = headX - 8; leftEyeY = headY + 8;
-          rightEyeX = headX + 8; rightEyeY = headY + 8;
+          leftEyeX = headX - 6; leftEyeY = headY + 6;
+          rightEyeX = headX + 6; rightEyeY = headY + 6;
           break;
         default:
-          leftEyeX = headX + 8; leftEyeY = headY - 8;
-          rightEyeX = headX + 8; rightEyeY = headY + 8;
+          leftEyeX = headX + 6; leftEyeY = headY - 6;
+          rightEyeX = headX + 6; rightEyeY = headY + 6;
       }
       
       // Add left eye
@@ -182,20 +182,20 @@ export class SvgRenderer {
         .attr('class', 'eye')
         .attr('cx', leftEyeX)
         .attr('cy', leftEyeY)
-        .attr('r', 8)
+        .attr('r', 6)
         .attr('fill', '#000')
         .attr('stroke', '#fff')
-        .attr('stroke-width', 2);
+        .attr('stroke-width', 1.5);
       
       // Add right eye
       this.snake.append('circle')
         .attr('class', 'eye')
         .attr('cx', rightEyeX)
         .attr('cy', rightEyeY)
-        .attr('r', 8)
+        .attr('r', 6)
         .attr('fill', '#000')
         .attr('stroke', '#fff')
-        .attr('stroke-width', 2);
+        .attr('stroke-width', 1.5);
     }
   }
 

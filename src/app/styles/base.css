@@ -1,0 +1,116 @@
+/* Reset and base styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  height: 100%;
+  overflow: hidden;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+  background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+  position: relative;
+}
+
+#stage { 
+  background: url('/src/assets/bg.svg') repeat;
+  background-size: 200px 200px;
+}
+
+/* Base button styles */
+.btn {
+  padding: 18px 40px;
+  border: none;
+  border-radius: 15px;
+  font-size: 1.2rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  position: relative;
+  overflow: hidden;
+  transform: scale(1);
+}
+
+.btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  transition: left 0.5s;
+}
+
+.btn:hover::before {
+  left: 100%;
+}
+
+.btn:active {
+  transform: scale(0.98);
+  transition: transform 0.1s ease;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #4CAF50, #66BB6A);
+  color: white;
+  box-shadow: 0 8px 25px rgba(76, 175, 80, 0.4);
+  border: 2px solid #388E3C;
+}
+
+.btn-primary:hover {
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 0 12px 35px rgba(76, 175, 80, 0.6);
+  background: linear-gradient(135deg, #66BB6A, #81C784);
+}
+
+.btn-primary:active {
+  transform: scale(0.98);
+  box-shadow: 0 4px 15px rgba(76, 175, 80, 0.8);
+}
+
+.btn-secondary {
+  background: linear-gradient(135deg, #8BC34A, #9CCC65);
+  color: white;
+  box-shadow: 0 8px 25px rgba(139, 195, 74, 0.4);
+  border: 2px solid #689F38;
+}
+
+.btn-secondary:hover {
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 0 12px 35px rgba(139, 195, 74, 0.6);
+  background: linear-gradient(135deg, #9CCC65, #AED581);
+}
+
+.btn-secondary:active {
+  transform: scale(0.98);
+  box-shadow: 0 4px 15px rgba(139, 195, 74, 0.8);
+}
+
+/* Base animations */
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(30px) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes rotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}

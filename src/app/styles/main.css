@@ -1,0 +1,16 @@
+/* Main CSS file - imports all other CSS files */
+
+/* Base styles - reset, typography, buttons, animations */
+@import url('./base.css');
+
+/* Component styles - HUD, overlays, start screen */
+@import url('./components.css');
+
+/* Game-specific styles - game over, menu */
+@import url('./game.css');
+
+/* Layout styles - positioning, grids, food guide */
+@import url('./layout.css');
+
+/* Responsive design - media queries */
+@import url('./responsive.css');

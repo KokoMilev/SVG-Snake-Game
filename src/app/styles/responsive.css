@@ -1,0 +1,254 @@
+/* Responsive adjustments */
+
+@media (max-width: 768px) {
+  .start-content, .game-over-content {
+    padding: 40px 30px;
+    max-width: 90vw;
+  }
+  
+  .start-header h1, .game-over-header h1 {
+    font-size: 2.8rem;
+  }
+  
+  .subtitle {
+    font-size: 1.1rem;
+  }
+  
+  .final-score {
+    font-size: 1.5rem;
+  }
+  
+  .final-score span {
+    font-size: 1.8rem;
+  }
+  
+  .btn {
+    padding: 16px 35px;
+    font-size: 1.1rem;
+  }
+  
+  .menu-content {
+    max-width: 95vw;
+    max-height: 95vh;
+  }
+  
+  .menu-header h1 {
+    font-size: 2rem;
+  }
+  
+  .tab-content {
+    padding: 20px;
+  }
+  
+  .control-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .food-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .food-item {
+    flex-direction: column;
+    text-align: center;
+    gap: 15px;
+  }
+  
+  .food-emoji {
+    font-size: 2.5rem;
+  }
+  
+  #effects {
+    max-width: 200px;
+    gap: 4px;
+    flex-direction: column;
+    align-items: center;
+    flex-wrap: nowrap;
+    border-left: none;
+    border-top: 1px solid rgba(42, 82, 152, 0.2);
+    padding-left: 8px;
+    padding-top: 8px;
+    margin-top: 0;
+    justify-content: center;
+    text-align: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .start-content, .game-over-content {
+    padding: 30px 20px;
+  }
+  
+  .start-header h1, .game-over-header h1 {
+    font-size: 2.2rem;
+  }
+  
+  .subtitle {
+    font-size: 1rem;
+    margin-bottom: 30px;
+  }
+  
+  .final-score {
+    font-size: 1.3rem;
+  }
+  
+  .final-score span {
+    font-size: 1.5rem;
+  }
+  
+  .start-buttons, .game-over-buttons {
+    gap: 15px;
+    margin-bottom: 30px;
+  }
+  
+  .btn {
+    padding: 14px 30px;
+    font-size: 1rem;
+  }
+  
+  .start-footer p, .game-over-footer p {
+    font-size: 0.8rem;
+  }
+  
+  #hud {
+    top: 5px;
+    padding: 10px 12px;
+    flex-direction: column;
+    gap: 12px;
+    align-items: center;
+  }
+  
+  #effects {
+    max-width: 200px;
+    gap: 4px;
+    flex-direction: column;
+    align-items: center;
+    flex-wrap: nowrap;
+    border-left: none;
+    border-top: 1px solid rgba(42, 82, 152, 0.2);
+    padding-left: 8px;
+    padding-top: 8px;
+    margin-top: 0;
+    justify-content: center;
+    text-align: center;
+  }
+  
+  .effect {
+    font-size: 8px;
+    text-align: center;
+    padding: 4px 5px;
+  }
+  
+  .menu-header {
+    padding: 20px;
+  }
+  
+  .menu-header h1 {
+    font-size: 1.8rem;
+  }
+  
+  .close-btn {
+    top: 15px;
+    right: 15px;
+    width: 35px;
+    height: 35px;
+    font-size: 1.5rem;
+  }
+  
+  .tab-btn {
+    padding: 12px 15px;
+    font-size: 0.9rem;
+  }
+  
+  .tab-content {
+    padding: 15px;
+  }
+  
+  .tab-content h2 {
+    font-size: 1.5rem;
+  }
+  
+  .tab-content h3 {
+    font-size: 1.1rem;
+  }
+  
+  .control-item {
+    padding: 15px;
+  }
+  
+  .food-item {
+    padding: 15px;
+  }
+}
+
+@media (max-width: 360px) {
+  .start-header h1, .game-over-header h1 {
+    font-size: 1.8rem;
+  }
+  
+  .subtitle {
+    font-size: 0.9rem;
+  }
+  
+  .final-score {
+    font-size: 1.1rem;
+  }
+  
+  .final-score span {
+    font-size: 1.3rem;
+  }
+  
+  .btn {
+    padding: 12px 25px;
+    font-size: 0.9rem;
+  }
+  
+  #hud {
+    top: 5px;
+    padding: 8px 10px;
+    flex-direction: column;
+    gap: 10px;
+    align-items: center;
+  }
+  
+  #effects {
+    max-width: 180px;
+    gap: 3px;
+    flex-direction: column;
+    align-items: center;
+    flex-wrap: nowrap;
+    border-left: none;
+    border-top: 1px solid rgba(42, 82, 152, 0.2);
+    padding-left: 6px;
+    padding-top: 10px;
+    margin-top: 0;
+    justify-content: center;
+    text-align: center;
+  }
+  
+  .effect {
+    font-size: 7px;
+    padding: 3px 4px;
+  }
+  
+  .menu-header h1 {
+    font-size: 1.6rem;
+  }
+  
+  .tab-btn {
+    padding: 10px 12px;
+    font-size: 0.8rem;
+  }
+  
+  .tab-content {
+    padding: 12px;
+  }
+  
+  .control-item {
+    padding: 12px;
+  }
+  
+  .food-item {
+    padding: 12px;
+  }
+}
