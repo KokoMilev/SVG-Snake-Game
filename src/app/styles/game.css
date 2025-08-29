@@ -264,3 +264,35 @@
 .tab-content li {
   margin-bottom: 8px;
 }
+
+/* Tips Tab Styles */
+.tips-section {
+  background: #f8f9fa;
+  border-radius: 12px;
+  padding: 25px;
+  margin-bottom: 25px;
+  border: 2px solid #e9ecef;
+}
+
+.tips-section h3 {
+  color: #2E7D32;
+  margin: 0 0 20px 0;
+  font-size: 1.3rem;
+  border: none;
+  padding: 0;
+  text-align: center;
+}
+
+.tips-section ul {
+  margin: 0;
+}
+
+.tips-section li {
+  color: #388E3C;
+  margin-bottom: 12px;
+  line-height: 1.6;
+}
+
+.tips-section strong {
+  color: #2E7D32;
+}

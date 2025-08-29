@@ -1,6 +1,7 @@
 import { Board } from './Board';
 import { Snake } from './Snake';
 import { FoodManager } from './FoodManager';
+import { AudioManager } from './AudioManager';
 import type { Dir, Point } from './types';
 
 export class GameState {
@@ -13,6 +14,7 @@ export class GameState {
   private snake: Snake;
   private foods: FoodManager;
   private board: Board;
+  private audioManager: AudioManager;
   
   // New properties for enhanced food effects
   private shieldActive = false;
@@ -27,6 +29,7 @@ export class GameState {
     this.board = board;
     this.snake = new Snake(start, startDir);
     this.foods = new FoodManager();
+    this.audioManager = new AudioManager();
     this.baseSpeedMs = baseTickMs;
     this.speedMs = baseTickMs;
     this.spawnFood();
@@ -41,12 +44,12 @@ export class GameState {
   getInvertUntil() { return this.invertUntil; }
   getShieldUntil() { return this.shieldUntil; }
   getDoublePointsUntil() { return this.doublePointsUntil; }
-  
-  // Pause management methods
+  getAudioManager() { return this.audioManager; }
   getTotalPauseTime() { return this.totalPauseTime; }
   
   pause(now: number) {
     this.pauseStartTime = now;
+    this.audioManager.playSound('pause');
   }
   
   resume(now: number) {
@@ -54,9 +57,10 @@ export class GameState {
       this.totalPauseTime += now - this.pauseStartTime;
       this.pauseStartTime = 0;
     }
+    this.audioManager.resumeBackgroundMusic();
+    this.audioManager.playSound('resume');
   }
   
-  // Get adjusted time that accounts for pause duration
   private getAdjustedTime(now: number): number {
     return now - this.totalPauseTime;
   }
@@ -97,9 +101,11 @@ export class GameState {
       if (this.shieldActive && adjustedNow < this.shieldUntil) {
         this.shieldActive = false;
         this.shieldUntil = 0;
+        this.audioManager.playSound('block');
         return; 
       }
-      this.alive = false; 
+      this.alive = false;
+      this.audioManager.playSound('dead');
       return;
     }
 
@@ -107,6 +113,7 @@ export class GameState {
     this.snake.move(!!eaten);
 
     if (eaten) {
+      this.audioManager.playFoodSound(eaten.kind);
       this.processFood(eaten, now);
       this.spawnFood();
     }
@@ -127,11 +134,15 @@ export class GameState {
       case 'mushroom':
         if (!this.shieldActive || now >= this.shieldUntil) {
           this.invertUntil = now + 30_000; 
+        } else {
+          this.audioManager.playSound('heal');
         }
         break;
       case 'pizza':
         if (!this.shieldActive || now >= this.shieldUntil) {
           this.speedMs = Math.max(80, Math.floor(this.speedMs * 0.85));
+        } else {
+          this.audioManager.playSound('heal');
         }
         break;
       case 'banana':
@@ -163,6 +174,7 @@ export class GameState {
     this.snake = new Snake(start, startDir);
     this.foods = new FoodManager();
     this.spawnFood();
+    this.audioManager.playSound('gameStart');
   }
 
   private spawnFood() {

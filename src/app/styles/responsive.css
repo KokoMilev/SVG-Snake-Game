@@ -71,6 +71,28 @@
     margin-top: 0;
     justify-content: center;
     text-align: center;
+    overflow: visible; /* Prevent cropping */
+    min-width: fit-content; /* Ensure effects don't get cut off */
+  }
+  
+  #audioControls {
+    flex-direction: column;
+    gap: 10px;
+    padding-left: 0;
+    padding-top: 10px;
+    border-left: none;
+    border-top: 1px solid rgba(42, 82, 152, 0.2);
+    align-items: center;
+  }
+  
+  .audio-btn {
+    width: 35px;
+    height: 35px;
+    font-size: 16px;
+  }
+  
+  .volume-control input[type="range"] {
+    width: 60px;
   }
 }
 
@@ -78,22 +100,22 @@
   .start-content, .game-over-content {
     padding: 30px 20px;
   }
-  
+
   .start-header h1, .game-over-header h1 {
-    font-size: 2.2rem;
+    font-size: 1.5rem;
   }
   
   .subtitle {
-    font-size: 1rem;
+    font-size: 0.8rem;
     margin-bottom: 30px;
   }
   
   .final-score {
-    font-size: 1.3rem;
+    font-size: 1rem;
   }
   
   .final-score span {
-    font-size: 1.5rem;
+    font-size: 1.2rem;
   }
   
   .start-buttons, .game-over-buttons {
@@ -112,22 +134,27 @@
   
   #hud {
     top: 5px;
-    padding: 10px 12px;
+    padding: 1x 12px;
     flex-direction: column;
-    gap: 12px;
+    gap: 2px;
     align-items: center;
+  }
+
+  #audioControls {
+    padding-top: 0;
+    padding-bottom: 0;
   }
   
   #effects {
     max-width: 200px;
-    gap: 4px;
+    gap: 2px;
     flex-direction: column;
     align-items: center;
     flex-wrap: nowrap;
     border-left: none;
     border-top: 1px solid rgba(42, 82, 152, 0.2);
     padding-left: 8px;
-    padding-top: 8px;
+    padding-top: 2px;
     margin-top: 0;
     justify-content: center;
     text-align: center;
@@ -136,7 +163,7 @@
   .effect {
     font-size: 8px;
     text-align: center;
-    padding: 4px 5px;
+    padding: 2px 5px;
   }
   
   .menu-header {
@@ -148,7 +175,7 @@
   }
   
   .close-btn {
-    top: 15px;
+    top: 2px;
     right: 15px;
     width: 35px;
     height: 35px;
@@ -173,34 +200,34 @@
   }
   
   .control-item {
-    padding: 15px;
+    padding: 2px;
   }
   
   .food-item {
-    padding: 15px;
+    padding: 2px;
   }
 }
 
 @media (max-width: 360px) {
   .start-header h1, .game-over-header h1 {
-    font-size: 1.8rem;
+    font-size: 1.3rem;
   }
   
   .subtitle {
-    font-size: 0.9rem;
+    font-size: 0.7rem;
   }
   
   .final-score {
-    font-size: 1.1rem;
+    font-size: 0.9rem;
   }
   
   .final-score span {
-    font-size: 1.3rem;
+    font-size: 1rem;
   }
   
   .btn {
     padding: 12px 25px;
-    font-size: 0.9rem;
+    font-size: 0.7rem;
   }
   
   #hud {
@@ -220,7 +247,7 @@
     border-left: none;
     border-top: 1px solid rgba(42, 82, 152, 0.2);
     padding-left: 6px;
-    padding-top: 10px;
+    padding-top: 0px;
     margin-top: 0;
     justify-content: center;
     text-align: center;
@@ -236,19 +263,19 @@
   }
   
   .tab-btn {
-    padding: 10px 12px;
+    padding: 0px 12px;
     font-size: 0.8rem;
   }
   
   .tab-content {
-    padding: 12px;
+    padding: 0px;
   }
   
   .control-item {
-    padding: 12px;
+    padding: 0px;
   }
   
   .food-item {
-    padding: 12px;
+    padding: 0px;
   }
 }

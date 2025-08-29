@@ -14,6 +14,12 @@
         <div>High Score: <span id="highScore">0</span></div>
       </div>
       <div id="effects" style="display: none;"></div>
+      <div id="audioControls">
+        <button id="audioToggle" class="audio-btn" title="Toggle All Sounds">🔊</button>
+        <div class="volume-control">
+          <input type="range" id="volumeSlider" min="0" max="1" step="0.1" value="0.7" title="Volume">
+        </div>
+      </div>
     </div>
 
     <div id="stage">
@@ -75,6 +81,7 @@
         
         <div class="menu-tabs">
           <button class="tab-btn active" data-tab="rules">Rules</button>
+          <button class="tab-btn" data-tab="tips">Tips</button>
           <button class="tab-btn" data-tab="controls">Controls</button>
           <button class="tab-btn" data-tab="foods">Food Guide</button>
         </div>
@@ -97,6 +104,52 @@
             <li>Press Space to pause/resume or restart after game over</li>
             <li>Press ESC to open this menu</li>
           </ul>
+        </div>
+        
+        <div class="tab-content" id="tips">
+          <h2>Gameplay Tips</h2>
+          
+          <div class="tips-section">
+            <h3>🎯 Strategy Tips</h3>
+            <ul>
+              <li><strong>Plan Your Route:</strong> Think ahead to avoid getting trapped</li>
+              <li><strong>Use the Grid:</strong> The grid lines help you plan precise movements</li>
+              <li><strong>Stay in the Center:</strong> Avoid edges when possible to give yourself more options</li>
+              <li><strong>Watch Your Tail:</strong> Your tail grows with each food eaten, so plan accordingly</li>
+            </ul>
+          </div>
+          
+          <div class="tips-section">
+            <h3>🍎 Food Strategy</h3>
+            <ul>
+              <li><strong>Cherry (100 pts):</strong> Basic food - safe to eat anytime</li>
+              <li><strong>Banana (120 pts):</strong> Slows you down - eat when you need more control</li>
+              <li><strong>Coconut (150 pts):</strong> Provides shield - great for risky situations</li>
+              <li><strong>Pineapple (200 pts):</strong> Double points - maximize score when safe</li>
+              <li><strong>Pizza (400 pts):</strong> Increases speed - eat when you're confident</li>
+              <li><strong>Mushroom (350 pts):</strong> Inverts controls - be very careful!</li>
+            </ul>
+          </div>
+          
+          <div class="tips-section">
+            <h3>⚡ Power-up Tips</h3>
+            <ul>
+              <li><strong>Shield Protection:</strong> Coconut shield protects you from crashes and negative effects</li>
+              <li><strong>Double Points:</strong> Pineapple doubles all food values for 15 seconds</li>
+              <li><strong>Speed Changes:</strong> Pizza and banana effects stack - plan your route accordingly</li>
+              <li><strong>Control Inversion:</strong> Mushroom inverts controls for 30 seconds - use shield to block it</li>
+            </ul>
+          </div>
+          
+          <div class="tips-section">
+            <h3>🎮 Control Shortcuts</h3>
+            <ul>
+              <li><strong>Space:</strong> Pause/Resume game or restart after game over</li>
+              <li><strong>M:</strong> Quick mute/unmute all sounds</li>
+              <li><strong>ESC:</strong> Open menu anytime during gameplay</li>
+              <li><strong>Arrow Keys/WASD:</strong> Control snake direction</li>
+            </ul>
+          </div>
         </div>
         
         <div class="tab-content" id="controls">
@@ -129,6 +182,10 @@
             <div class="control-item">
               <span class="key">ESC</span>
               <span class="description">Open Menu</span>
+            </div>
+            <div class="control-item">
+              <span class="key">M</span>
+              <span class="description">Mute/Unmute Sounds</span>
             </div>
           </div>
         </div>
@@ -198,6 +255,73 @@
               <li>Double points multiplies all food values</li>
               <li>Speed changes stack with each food eaten</li>
               <li>Plan your route to avoid getting trapped!</li>
+            </ul>
+          </div>
+        </div>
+        
+        <div class="tab-content" id="settings">
+          <h2>Audio Settings</h2>
+          
+          <div class="settings-section">
+            <h3>🎵 Sound Controls</h3>
+            
+            <div class="setting-item">
+              <div class="setting-label">
+                <span class="setting-icon">🍽️</span>
+                <div class="setting-text">
+                  <strong>Food Sounds</strong>
+                  <span class="setting-description">Sounds when eating different foods</span>
+                </div>
+              </div>
+              <button id="foodSoundsToggle" class="toggle-btn active">ON</button>
+            </div>
+            
+            <div class="setting-item">
+              <div class="setting-label">
+                <span class="setting-icon">🎮</span>
+                <div class="setting-text">
+                  <strong>Gameplay Sounds</strong>
+                  <span class="setting-description">Game start, pause, resume, and game over sounds</span>
+                </div>
+              </div>
+              <button id="gameSoundsToggle" class="toggle-btn active">ON</button>
+            </div>
+            
+            <div class="setting-item">
+              <div class="setting-label">
+                <span class="setting-icon">🎵</span>
+                <div class="setting-text">
+                  <strong>Background Music</strong>
+                  <span class="setting-description">Background music during gameplay</span>
+                </div>
+              </div>
+              <button id="backgroundMusicToggle" class="toggle-btn active">ON</button>
+            </div>
+            
+            <div class="setting-item">
+              <div class="setting-label">
+                <span class="setting-icon">🔊</span>
+                <div class="setting-text">
+                  <strong>Master Volume</strong>
+                  <span class="setting-description">Overall volume level for all sounds</span>
+                </div>
+              </div>
+              <div class="volume-setting">
+                <input type="range" id="settingsVolumeSlider" min="0" max="1" step="0.1" value="0.7" class="volume-slider">
+                <span id="settingsVolumeDisplay">70%</span>
+              </div>
+            </div>
+          </div>
+          
+          <div class="settings-info">
+            <h3>💡 Audio Information</h3>
+            <ul>
+              <li><strong>Food Sounds:</strong> Control eating sounds for cherries, bananas, coconuts, pineapples, pizza, and mushrooms</li>
+              <li><strong>Gameplay Sounds:</strong> Control game event sounds like start, pause, resume, and game over</li>
+              <li><strong>Background Music:</strong> Control looping background music during gameplay</li>
+              <li><strong>Master Volume:</strong> Adjusts the overall volume level for all audio</li>
+              <li>All settings are automatically saved and will be remembered between game sessions</li>
+              <li>Use the 🔊 button in the HUD for quick mute/unmute of all sounds</li>
             </ul>
           </div>
         </div>

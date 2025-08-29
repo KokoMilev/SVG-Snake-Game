@@ -9,7 +9,7 @@ function qs<T extends Element>(s: string) {
   return el as T;
 }
 
-const COLS = 20, ROWS = 15, CELL = 25;
+const COLS = 20, ROWS = 15, CELL = 30;
 const board = new Board(COLS, ROWS);
 const state = new GameState(board, { x: Math.floor(COLS/3), y: Math.floor(ROWS/2) }, 'right', 140);
 const renderer = new SvgRenderer(qs('#game'), COLS, ROWS, CELL);
@@ -35,10 +35,19 @@ const finalScoreEl = qs<HTMLSpanElement>('#finalScore');
 const gameOverHighScoreEl = qs<HTMLSpanElement>('#gameOverHighScore');
 const restartBtn = qs<HTMLButtonElement>('#restartBtn');
 const mainMenuBtn = qs<HTMLButtonElement>('#mainMenuBtn');
+const audioManager = state.getAudioManager();
 
 // High score management
 let highScore = parseInt(localStorage.getItem('snakeHighScore') || '0');
 highScoreEl.textContent = String(highScore);
+
+let audioEnabled = localStorage.getItem('snakeAudioEnabled') !== 'false';
+let volumeLevel = parseFloat(localStorage.getItem('snakeVolume') || '0.7');
+
+if (!audioEnabled) {
+  audioManager.mute();
+}
+audioManager.setVolume(volumeLevel);
 
 function updateHighScore(score: number) {
   if (score > highScore) {
@@ -59,16 +68,11 @@ function hideOverlay() {
   overlay.classList.remove('show');
 }
 
-// Start screen functions
 function hideStartScreen() {
   startScreen?.classList.add('hide');
+  audioManager.playBackgroundMusic();
 }
 
-function showStartScreen() {
-  startScreen?.classList.remove('hide');
-}
-
-// Game over functions
 function showGameOver() {
   if (gameOverScreen && finalScoreEl && gameOverHighScoreEl) {
     finalScoreEl.textContent = String(state.getScore());
@@ -81,10 +85,8 @@ function hideGameOver() {
   gameOverScreen?.classList.remove('show');
 }
 
-// Menu functions
 function openMenu() {
   menu?.classList.add('show');
-  // Pause the game when menu is open
   if (!paused && state.isAlive()) {
     pause();
   }
@@ -95,11 +97,9 @@ function closeMenu() {
 }
 
 function switchTab(tabName: string) {
-  // Remove active class from all tabs and contents
   tabBtns.forEach(btn => btn.classList.remove('active'));
   tabContents.forEach(content => content.classList.remove('active'));
   
-  // Add active class to selected tab and content
   const selectedTab = document.querySelector(`[data-tab="${tabName}"]`) as HTMLButtonElement;
   const selectedContent = document.getElementById(tabName);
   
@@ -113,7 +113,6 @@ function showCurrentEffects() {
   const now = Date.now();
   const effects: string[] = [];
   
-  // Check for active effects using adjusted time
   const adjustedNow = now - state.getTotalPauseTime();
   
   if (adjustedNow < state.getInvertUntil()) {
@@ -158,7 +157,6 @@ function updateEffectsDisplay() {
     effects.push('⚡ 2x Points');
   }
   
-  // Update effects display
   const effectsEl = document.getElementById('effects');
   if (effectsEl) {
     if (effects.length > 0) {
@@ -182,7 +180,6 @@ function loop() {
   renderer.renderSnake(state.getSnakeBody());
   scoreEl.textContent = String(state.getScore());
   
-  // Update effects display
   updateEffectsDisplay();
 
   if (!state.isAlive()) {
@@ -214,7 +211,6 @@ function pause() {
   if (timer !== null) { clearTimeout(timer); timer = null; }
   state.pause(Date.now());
   showOverlay('Paused — Press Space to Resume');
-  // Show current effects state when paused
   showCurrentEffects();
 }
 
@@ -226,6 +222,9 @@ function restart() {
   renderer.renderSnake(state.getSnakeBody());
   scoreEl.textContent = '0';
   hideGameOver();
+  
+  audioManager.playBackgroundMusic();
+  
   start();
 }
 
@@ -239,7 +238,6 @@ function goToMainMenu() {
   scoreEl.textContent = '0';
   hideGameOver();
   
-  // Reset start screen to its initial state
   if (startScreen) {
     startScreen.style.transition = '';
     startScreen.style.opacity = '';
@@ -249,14 +247,12 @@ function goToMainMenu() {
 }
 
 function startNewGame() {
-  // Smooth fade-out transition
   if (startScreen) {
     startScreen.style.transition = 'opacity 0.8s ease-out, transform 0.8s ease-out';
     startScreen.style.opacity = '0';
     startScreen.style.transform = 'scale(0.95) translateY(-20px)';
   }
   
-  // Start the game after the fade animation completes
   setTimeout(() => {
     gameStarted = true;
     hideStartScreen();
@@ -265,6 +261,40 @@ function startNewGame() {
     state.resume(Date.now());
     scheduleNext(Date.now());
   }, 800);
+}
+
+function toggleAudio() {
+  if (audioManager.isMuted()) {
+    audioManager.unmute();
+    audioEnabled = true;
+    localStorage.setItem('snakeAudioEnabled', 'true');
+  } else {
+    audioManager.mute();
+    audioEnabled = false;
+    localStorage.setItem('snakeAudioEnabled', 'false');
+  }
+  updateAudioUI();
+}
+
+function setVolume(volume: number) {
+  volumeLevel = volume;
+  audioManager.setVolume(volume);
+  localStorage.setItem('snakeVolume', String(volume));
+  updateAudioUI();
+}
+
+function updateAudioUI() {
+  const audioBtn = document.getElementById('audioToggle');
+  const volumeSlider = document.getElementById('volumeSlider') as HTMLInputElement;
+  
+  if (audioBtn) {
+    audioBtn.innerHTML = audioEnabled ? '🔊' : '🔇';
+    audioBtn.title = audioEnabled ? 'Mute Audio' : 'Unmute Audio';
+  }
+  
+  if (volumeSlider) {
+    volumeSlider.value = String(volumeLevel);
+  }
 }
 
 // Event listeners
@@ -287,9 +317,21 @@ window.addEventListener('keydown', (e) => {
     return;
   }
   
+  if (e.code === 'KeyM') {
+    toggleAudio();
+    return;
+  }
+  
   if (e.code === 'Space') {
-    // Don't allow space to resume/pause if menu is open
     if (menu?.classList.contains('show')) {
+      return;
+    }
+    const activeElement = document.activeElement;
+    if (activeElement && (
+      activeElement.id === 'audioToggle' || 
+      activeElement.id === 'volumeSlider' ||
+      activeElement.closest('#audioControls')
+    )) {
       return;
     }
     
@@ -309,11 +351,9 @@ window.addEventListener('keydown', (e) => {
   if (dir) state.setDirection(dir, Date.now());
 });
 
-// Start screen event listeners
 startGameBtn?.addEventListener('click', startNewGame);
 rulesBtn?.addEventListener('click', () => {
   openMenu();
-  // Switch to rules tab
   switchTab('rules');
 });
 
@@ -328,19 +368,9 @@ mainMenuBtn?.addEventListener('click', () => {
   goToMainMenu();
 });
 
-// Debug button elements
-console.log('Game over elements:', {
-  gameOverScreen: !!gameOverScreen,
-  restartBtn: !!restartBtn,
-  mainMenuBtn: !!mainMenuBtn,
-  finalScoreEl: !!finalScoreEl,
-  gameOverHighScoreEl: !!gameOverHighScoreEl
-});
 
-// Menu event listeners
 closeMenuBtn?.addEventListener('click', closeMenu);
 
-// Tab switching
 tabBtns.forEach(btn => {
   btn.addEventListener('click', () => {
     const tabName = btn.getAttribute('data-tab');
@@ -350,22 +380,15 @@ tabBtns.forEach(btn => {
   });
 });
 
-// Close menu when clicking outside
 menu?.addEventListener('click', (e) => {
   if (e.target === menu) {
     closeMenu();
   }
 });
 
-// Initialize the game
-renderer.renderFoods(state.getFood());
-renderer.renderSnake(state.getSnakeBody());
-
-// Ensure DOM is ready before attaching event listeners
 document.addEventListener('DOMContentLoaded', () => {
   console.log('DOM loaded, checking game over elements...');
   
-  // Re-check elements after DOM is loaded
   const gameOverScreenLoaded = document.getElementById('gameOverScreen');
   const mainMenuBtnLoaded = document.getElementById('mainMenuBtn');
   const restartBtnLoaded = document.getElementById('restartBtn');
@@ -376,7 +399,6 @@ document.addEventListener('DOMContentLoaded', () => {
     restartBtn: !!restartBtnLoaded
   });
   
-  // Re-attach event listeners if elements are found
   if (mainMenuBtnLoaded) {
     mainMenuBtnLoaded.addEventListener('click', () => {
       console.log('Main menu button clicked (DOM loaded)');
@@ -390,6 +412,44 @@ document.addEventListener('DOMContentLoaded', () => {
       restart();
     });
   }
+  
+  const audioToggle = document.getElementById('audioToggle');
+  const volumeSlider = document.getElementById('volumeSlider');
+  
+  if (audioToggle) {
+    audioToggle.addEventListener('click', toggleAudio);
+    audioToggle.addEventListener('keydown', (e) => {
+      if (e.code === 'Space') {
+        e.preventDefault();
+        e.stopPropagation();
+        // Make the button lose focus so space can work for game controls
+        (e.target as HTMLElement).blur();
+      }
+    });
+  }
+  
+  if (volumeSlider) {
+    volumeSlider.addEventListener('input', (e) => {
+      const target = e.target as HTMLInputElement;
+      setVolume(parseFloat(target.value));
+    });
+    volumeSlider.addEventListener('keydown', (e) => {
+      if (e.code === 'Space') {
+        e.preventDefault();
+        e.stopPropagation();
+        (e.target as HTMLElement).blur();
+      }
+    });
+  }
+  
+  updateAudioUI();
+  
+  const enableAudio = () => {
+    audioManager.enableAudio();
+    document.removeEventListener('click', enableAudio);
+    document.removeEventListener('keydown', enableAudio);
+  };
+  
+  document.addEventListener('click', enableAudio);
+  document.addEventListener('keydown', enableAudio);
 });
-
-// Don't show overlay initially - start screen will be shown
