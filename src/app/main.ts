@@ -3,97 +3,157 @@ import { GameState } from '../domain/GameState';
 import type { Dir } from '../domain/types';
 import { SvgRenderer } from '../ui/SvgRenderer';
 
-function qs<T extends Element>(s: string) {
-  const el = document.querySelector(s);
-  if (!el) throw new Error(`Missing ${s}`);
-  return el as T;
+// Configuration constants
+const GAME_CONFIG = {
+  COLS: 20,
+  ROWS: 15,
+  CELL_SIZE: 30,
+  ANIMATION_DELAY: 800,
+  BASE_TICK_MS: 140,
+  START_POSITION: { x: 6, y: 7 } // Math.floor(COLS/3), Math.floor(ROWS/2)
+} as const;
+
+// Type definitions for better code organization
+interface GameElements {
+  score: HTMLSpanElement;
+  highScore: HTMLSpanElement;
+  overlay: HTMLDivElement;
+  menu: HTMLDivElement;
+  closeMenu: HTMLButtonElement;
+  startScreen: HTMLDivElement;
+  startGame: HTMLButtonElement;
+  rules: HTMLButtonElement;
+  gameOver: HTMLDivElement;
+  finalScore: HTMLSpanElement;
+  gameOverHighScore: HTMLSpanElement;
+  restart: HTMLButtonElement;
+  mainMenu: HTMLButtonElement;
 }
 
-const COLS = 20, ROWS = 15, CELL = 30;
-const board = new Board(COLS, ROWS);
-const state = new GameState(board, { x: Math.floor(COLS/3), y: Math.floor(ROWS/2) }, 'right', 140);
-const renderer = new SvgRenderer(qs('#game'), COLS, ROWS, CELL);
+interface AudioSettings {
+  enabled: boolean;
+  volume: number;
+}
 
-const scoreEl = qs<HTMLSpanElement>('#score');
-const highScoreEl = qs<HTMLSpanElement>('#highScore');
-const overlay = qs<HTMLDivElement>('#overlay');
+// Utility function with better error handling
+function getRequiredElement<T extends Element>(selector: string, context: string): T {
+  const element = document.querySelector<T>(selector);
+  if (!element) {
+    throw new Error(`Required element not found: ${selector} (${context})`);
+  }
+  return element;
+}
 
-// Menu elements
-const menu = qs<HTMLDivElement>('#menu');
-const closeMenuBtn = qs<HTMLButtonElement>('#closeMenu');
+// Validate game configuration
+function validateGameConfig() {
+  if (GAME_CONFIG.COLS < 10 || GAME_CONFIG.ROWS < 10) {
+    throw new Error('Game board dimensions too small');
+  }
+  if (GAME_CONFIG.CELL_SIZE < 20 || GAME_CONFIG.CELL_SIZE > 50) {
+    throw new Error('Cell size out of valid range');
+  }
+  if (GAME_CONFIG.BASE_TICK_MS < 50 || GAME_CONFIG.BASE_TICK_MS > 500) {
+    throw new Error('Base tick time out of valid range');
+  }
+}
+
+// Initialize game components with validation
+let board: Board;
+let state: GameState;
+let renderer: SvgRenderer;
+
+try {
+  validateGameConfig();
+  board = new Board(GAME_CONFIG.COLS, GAME_CONFIG.ROWS);
+  state = new GameState(board, GAME_CONFIG.START_POSITION, 'right', GAME_CONFIG.BASE_TICK_MS);
+  renderer = new SvgRenderer(getRequiredElement('#game', 'game container'), GAME_CONFIG.COLS, GAME_CONFIG.ROWS, GAME_CONFIG.CELL_SIZE);
+} catch (error) {
+  console.error('Failed to initialize game:', error);
+  throw error;
+}
+
+// DOM element references
+const elements: GameElements = {
+  score: getRequiredElement<HTMLSpanElement>('#score', 'score display'),
+  highScore: getRequiredElement<HTMLSpanElement>('#highScore', 'high score display'),
+  overlay: getRequiredElement<HTMLDivElement>('#overlay', 'game overlay'),
+  menu: getRequiredElement<HTMLDivElement>('#menu', 'game menu'),
+  closeMenu: getRequiredElement<HTMLButtonElement>('#closeMenu', 'close menu button'),
+  startScreen: getRequiredElement<HTMLDivElement>('#startScreen', 'start screen'),
+  startGame: getRequiredElement<HTMLButtonElement>('#startGameBtn', 'start game button'),
+  rules: getRequiredElement<HTMLButtonElement>('#rulesBtn', 'rules button'),
+  gameOver: getRequiredElement<HTMLDivElement>('#gameOverScreen', 'game over screen'),
+  finalScore: getRequiredElement<HTMLSpanElement>('#finalScore', 'final score display'),
+  gameOverHighScore: getRequiredElement<HTMLSpanElement>('#gameOverHighScore', 'game over high score'),
+  restart: getRequiredElement<HTMLButtonElement>('#restartBtn', 'restart button'),
+  mainMenu: getRequiredElement<HTMLButtonElement>('#mainMenuBtn', 'main menu button')
+};
+
 const tabBtns = document.querySelectorAll<HTMLButtonElement>('.tab-btn');
 const tabContents = document.querySelectorAll<HTMLDivElement>('.tab-content');
-
-// Start screen elements
-const startScreen = qs<HTMLDivElement>('#startScreen');
-const startGameBtn = qs<HTMLButtonElement>('#startGameBtn');
-const rulesBtn = qs<HTMLButtonElement>('#rulesBtn');
-
-// Game over elements
-const gameOverScreen = qs<HTMLDivElement>('#gameOverScreen');
-const finalScoreEl = qs<HTMLSpanElement>('#finalScore');
-const gameOverHighScoreEl = qs<HTMLSpanElement>('#gameOverHighScore');
-const restartBtn = qs<HTMLButtonElement>('#restartBtn');
-const mainMenuBtn = qs<HTMLButtonElement>('#mainMenuBtn');
 const audioManager = state.getAudioManager();
 
-// High score management
+// Game state variables
 let highScore = parseInt(localStorage.getItem('snakeHighScore') || '0');
-highScoreEl.textContent = String(highScore);
+let audioSettings: AudioSettings = {
+  enabled: localStorage.getItem('snakeAudioEnabled') !== 'false',
+  volume: parseFloat(localStorage.getItem('snakeVolume') || '0.7')
+};
 
-let audioEnabled = localStorage.getItem('snakeAudioEnabled') !== 'false';
-let volumeLevel = parseFloat(localStorage.getItem('snakeVolume') || '0.7');
-
-if (!audioEnabled) {
+// Initialize audio settings
+if (!audioSettings.enabled) {
   audioManager.mute();
 }
-audioManager.setVolume(volumeLevel);
+audioManager.setVolume(audioSettings.volume);
+
+// Update high score display
+elements.highScore.textContent = String(highScore);
 
 function updateHighScore(score: number) {
   if (score > highScore) {
     highScore = score;
-    highScoreEl.textContent = String(highScore);
+    elements.highScore.textContent = String(highScore);
     localStorage.setItem('snakeHighScore', String(highScore));
   }
 }
 
 function showOverlay(msg: string) {
-  overlay.textContent = msg;
-  overlay.style.display = 'flex';
-  overlay.classList.add('show');
+  elements.overlay.textContent = msg;
+  elements.overlay.style.display = 'flex';
+  elements.overlay.classList.add('show');
 }
 
 function hideOverlay() {
-  overlay.style.display = 'none';
-  overlay.classList.remove('show');
+  elements.overlay.style.display = 'none';
+  elements.overlay.classList.remove('show');
 }
 
 function hideStartScreen() {
-  startScreen?.classList.add('hide');
+  elements.startScreen?.classList.add('hide');
   audioManager.playBackgroundMusic();
 }
 
 function showGameOver() {
-  if (gameOverScreen && finalScoreEl && gameOverHighScoreEl) {
-    finalScoreEl.textContent = String(state.getScore());
-    gameOverHighScoreEl.textContent = String(highScore);
-    gameOverScreen.classList.add('show');
+  if (elements.gameOver && elements.finalScore && elements.gameOverHighScore) {
+    elements.finalScore.textContent = String(state.getScore());
+    elements.gameOverHighScore.textContent = String(highScore);
+    elements.gameOver.classList.add('show');
   }
 }
 
 function hideGameOver() {
-  gameOverScreen?.classList.remove('show');
+  elements.gameOver?.classList.remove('show');
 }
 
 function openMenu() {
-  menu?.classList.add('show');
+  elements.menu?.classList.add('show');
   if (!paused && state.isAlive()) {
-    pause();
+    pauseGame();
   }
 }
 
 function closeMenu() {
-  menu?.classList.remove('show');
+  elements.menu?.classList.remove('show');
 }
 
 function switchTab(tabName: string) {
@@ -109,7 +169,7 @@ function switchTab(tabName: string) {
   }
 }
 
-function showCurrentEffects() {
+function updateEffects() {
   const now = Date.now();
   const effects: string[] = [];
   
@@ -125,62 +185,31 @@ function showCurrentEffects() {
     effects.push('⚡ 2x Points');
   }
   
-  // Update effects display
   const effectsEl = document.getElementById('effects');
   if (effectsEl) {
+    effectsEl.style.display = effects.length > 0 ? 'block' : 'none';
     if (effects.length > 0) {
       effectsEl.innerHTML = effects.map(effect => `<div class="effect">${effect}</div>`).join('');
-      effectsEl.style.display = 'block';
-    } else {
-      effectsEl.style.display = 'none';
     }
   }
 }
 
-function updateEffectsDisplay() {
-  // Only update effects if the game is not paused
-  if (paused) return;
-  
-  const now = Date.now();
-  const effects: string[] = [];
-  
-  // Check for active effects using adjusted time
-  const adjustedNow = now - state.getTotalPauseTime();
-  
-  if (adjustedNow < state.getInvertUntil()) {
-    effects.push('🔄 Invert');
-  }
-  if (adjustedNow < state.getShieldUntil()) {
-    effects.push('🛡️ Shield');
-  }
-  if (adjustedNow < state.getDoublePointsUntil()) {
-    effects.push('⚡ 2x Points');
-  }
-  
-  const effectsEl = document.getElementById('effects');
-  if (effectsEl) {
-    if (effects.length > 0) {
-      effectsEl.innerHTML = effects.map(effect => `<div class="effect">${effect}</div>`).join('');
-      effectsEl.style.display = 'block';
-    } else {
-      effectsEl.style.display = 'none';
-    }
-  }
-}
-
+// Game state management
 let paused = true;
 let timer: number | null = null;
 let gameStarted = false;
 
-function loop() {
+// Core game loop
+function gameLoop() {
   if (paused || !state.isAlive()) return;
-  const now = Date.now();
-  state.step(now);
+  
+  const currentTime = Date.now();
+  state.step(currentTime);
   renderer.renderFoods(state.getFood());  
   renderer.renderSnake(state.getSnakeBody());
-  scoreEl.textContent = String(state.getScore());
+  elements.score.textContent = String(state.getScore());
   
-  updateEffectsDisplay();
+  updateEffects();
 
   if (!state.isAlive()) {
     updateHighScore(state.getScore());
@@ -188,69 +217,64 @@ function loop() {
     return;
   }
 
-  scheduleNext(now);
+  scheduleNextFrame(currentTime);
 }
 
-function scheduleNext(now: number) {
-  const delay = state.getTickMs(now);
-  timer = window.setTimeout(loop, delay);
+function scheduleNextFrame(currentTime: number) {
+  const frameDelay = state.getTickMs(currentTime);
+  timer = window.setTimeout(gameLoop, frameDelay);
 }
 
-function start() {
-  if (!state.isAlive()) return; // require restart if dead
-  if (!paused) return;
+// Game control functions
+function startGame() {
+  if (!state.isAlive() || !paused) return;
+  
   paused = false;
   state.resume(Date.now());
   hideOverlay();
-  scheduleNext(Date.now());
+  scheduleNextFrame(Date.now());
 }
 
-function pause() {
+function pauseGame() {
   if (!state.isAlive()) return;
+  
   paused = true;
-  if (timer !== null) { clearTimeout(timer); timer = null; }
+  clearGameTimer();
   state.pause(Date.now());
   showOverlay('Paused — Press Space to Resume');
-  showCurrentEffects();
+  updateEffects();
 }
 
-function restart() {
+function restartGame() {
   paused = true;
-  if (timer !== null) { clearTimeout(timer); timer = null; }
-  state.reset({ x: Math.floor(COLS/3), y: Math.floor(ROWS/2) }, 'right');
-  renderer.renderFoods(state.getFood());
-  renderer.renderSnake(state.getSnakeBody());
-  scoreEl.textContent = '0';
+  clearGameTimer();
+  resetGameState();
   hideGameOver();
   
   audioManager.playBackgroundMusic();
-  
-  start();
+  startGame();
 }
 
-function goToMainMenu() {
+function returnToMainMenu() {
   gameStarted = false;
   paused = true;
-  if (timer !== null) { clearTimeout(timer); timer = null; }
-  state.reset({ x: Math.floor(COLS/3), y: Math.floor(ROWS/2) }, 'right');
-  renderer.renderFoods(state.getFood());
-  renderer.renderSnake(state.getSnakeBody());
-  scoreEl.textContent = '0';
+  clearGameTimer();
+  resetGameState();
   hideGameOver();
   
-  if (startScreen) {
-    startScreen.style.transition = '';
-    startScreen.style.opacity = '';
-    startScreen.style.transform = '';
-    startScreen.classList.remove('hide');
+  if (elements.startScreen) {
+    elements.startScreen.style.transition = '';
+    elements.startScreen.style.opacity = '';
+    elements.startScreen.style.transform = '';
+    elements.startScreen.classList.remove('hide');
   }
 }
 
 function startNewGame() {
-  if (startScreen) {
-    startScreen.style.transition = 'opacity 0.8s ease-out, transform 0.8s ease-out';
-    startScreen.style.opacity = '0';
-    startScreen.style.transform = 'scale(0.95) translateY(-20px)';
+  if (elements.startScreen) {
+    elements.startScreen.style.transition = 'opacity 0.8s ease-out, transform 0.8s ease-out';
+    elements.startScreen.style.opacity = '0';
+    elements.startScreen.style.transform = 'scale(0.95) translateY(-20px)';
   }
   
   setTimeout(() => {
@@ -259,25 +283,41 @@ function startNewGame() {
     hideOverlay();
     paused = false;
     state.resume(Date.now());
-    scheduleNext(Date.now());
-  }, 800);
+    scheduleNextFrame(Date.now());
+  }, GAME_CONFIG.ANIMATION_DELAY);
 }
 
+// Utility functions
+function clearGameTimer() {
+  if (timer !== null) {
+    clearTimeout(timer);
+    timer = null;
+  }
+}
+
+function resetGameState() {
+  state.reset({ x: Math.floor(GAME_CONFIG.COLS/3), y: Math.floor(GAME_CONFIG.ROWS/2) }, 'right');
+  renderer.renderFoods(state.getFood());
+  renderer.renderSnake(state.getSnakeBody());
+  elements.score.textContent = '0';
+}
+
+// Audio management
 function toggleAudio() {
   if (audioManager.isMuted()) {
     audioManager.unmute();
-    audioEnabled = true;
+    audioSettings.enabled = true;
     localStorage.setItem('snakeAudioEnabled', 'true');
   } else {
     audioManager.mute();
-    audioEnabled = false;
+    audioSettings.enabled = false;
     localStorage.setItem('snakeAudioEnabled', 'false');
   }
   updateAudioUI();
 }
 
 function setVolume(volume: number) {
-  volumeLevel = volume;
+  audioSettings.volume = volume;
   audioManager.setVolume(volume);
   localStorage.setItem('snakeVolume', String(volume));
   updateAudioUI();
@@ -288,16 +328,28 @@ function updateAudioUI() {
   const volumeSlider = document.getElementById('volumeSlider') as HTMLInputElement;
   
   if (audioBtn) {
-    audioBtn.innerHTML = audioEnabled ? '🔊' : '🔇';
-    audioBtn.title = audioEnabled ? 'Mute Audio' : 'Unmute Audio';
+    audioBtn.innerHTML = audioSettings.enabled ? '🔊' : '🔇';
+    audioBtn.title = audioSettings.enabled ? 'Mute Audio' : 'Unmute Audio';
   }
   
   if (volumeSlider) {
-    volumeSlider.value = String(volumeLevel);
+    volumeSlider.value = String(audioSettings.volume);
   }
 }
 
-// Event listeners
+// Event handling utilities
+function addAudioControlListeners(element: HTMLElement, action: () => void) {
+  element.addEventListener('click', action);
+  element.addEventListener('keydown', (e) => {
+    if (e.code === 'Space') {
+      e.preventDefault();
+      e.stopPropagation();
+      (e.target as HTMLElement).blur();
+    }
+  });
+}
+
+// Keyboard event handling
 window.addEventListener('keydown', (e) => {
   const keyToDir: Record<string, Dir | undefined> = {
     ArrowUp: 'up',    KeyW: 'up',
@@ -307,10 +359,8 @@ window.addEventListener('keydown', (e) => {
   };
   
   if (e.code === 'Escape') {
-    if (menu?.classList.contains('show')) {
+    if (elements.menu?.classList.contains('show')) {
       closeMenu();
-    } else if (gameStarted && !state.isAlive()) {
-      openMenu();
     } else if (gameStarted) {
       openMenu();
     }
@@ -323,27 +373,18 @@ window.addEventListener('keydown', (e) => {
   }
   
   if (e.code === 'Space') {
-    if (menu?.classList.contains('show')) {
-      return;
-    }
+    if (elements.menu?.classList.contains('show')) return;
+    
     const activeElement = document.activeElement;
-    if (activeElement && (
-      activeElement.id === 'audioToggle' || 
-      activeElement.id === 'volumeSlider' ||
-      activeElement.closest('#audioControls')
-    )) {
-      return;
-    }
+    if (activeElement?.closest('#audioControls')) return;
     
     if (!gameStarted) {
       startNewGame();
-      return;
+    } else if (!state.isAlive()) {
+      restartGame();
+    } else {
+      paused ? startGame() : pauseGame();
     }
-    if (!state.isAlive()) { 
-      restart();
-      return;
-    }
-    paused ? start() : pause();
     return;
   }
   
@@ -351,81 +392,35 @@ window.addEventListener('keydown', (e) => {
   if (dir) state.setDirection(dir, Date.now());
 });
 
-startGameBtn?.addEventListener('click', startNewGame);
-rulesBtn?.addEventListener('click', () => {
-  openMenu();
-  switchTab('rules');
-});
-
-// Game over event listeners
-restartBtn?.addEventListener('click', () => {
-  console.log('Restart button clicked');
-  restart();
-});
-
-mainMenuBtn?.addEventListener('click', () => {
-  console.log('Main menu button clicked');
-  goToMainMenu();
-});
-
-
-closeMenuBtn?.addEventListener('click', closeMenu);
-
-tabBtns.forEach(btn => {
-  btn.addEventListener('click', () => {
-    const tabName = btn.getAttribute('data-tab');
-    if (tabName) {
-      switchTab(tabName);
-    }
+// Event listener setup
+function setupEventListeners() {
+  elements.startGame?.addEventListener('click', startNewGame);
+  elements.rules?.addEventListener('click', () => {
+    openMenu();
+    switchTab('rules');
   });
-});
-
-menu?.addEventListener('click', (e) => {
-  if (e.target === menu) {
-    closeMenu();
-  }
-});
-
-document.addEventListener('DOMContentLoaded', () => {
-  console.log('DOM loaded, checking game over elements...');
+  elements.restart?.addEventListener('click', restartGame);
+  elements.mainMenu?.addEventListener('click', returnToMainMenu);
+  elements.closeMenu?.addEventListener('click', closeMenu);
   
-  const gameOverScreenLoaded = document.getElementById('gameOverScreen');
-  const mainMenuBtnLoaded = document.getElementById('mainMenuBtn');
-  const restartBtnLoaded = document.getElementById('restartBtn');
-  
-  console.log('DOM loaded elements:', {
-    gameOverScreen: !!gameOverScreenLoaded,
-    mainMenuBtn: !!mainMenuBtnLoaded,
-    restartBtn: !!restartBtnLoaded
+  tabBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const tabName = btn.getAttribute('data-tab');
+      if (tabName) switchTab(tabName);
+    });
   });
   
-  if (mainMenuBtnLoaded) {
-    mainMenuBtnLoaded.addEventListener('click', () => {
-      console.log('Main menu button clicked (DOM loaded)');
-      goToMainMenu();
-    });
-  }
-  
-  if (restartBtnLoaded) {
-    restartBtnLoaded.addEventListener('click', () => {
-      console.log('Restart button clicked (DOM loaded)');
-      restart();
-    });
-  }
-  
+  elements.menu?.addEventListener('click', (e) => {
+    if (e.target === elements.menu) closeMenu();
+  });
+}
+
+function setupAudioControls() {
   const audioToggle = document.getElementById('audioToggle');
   const volumeSlider = document.getElementById('volumeSlider');
   
   if (audioToggle) {
-    audioToggle.addEventListener('click', toggleAudio);
-    audioToggle.addEventListener('keydown', (e) => {
-      if (e.code === 'Space') {
-        e.preventDefault();
-        e.stopPropagation();
-        // Make the button lose focus so space can work for game controls
-        (e.target as HTMLElement).blur();
-      }
-    });
+    addAudioControlListeners(audioToggle, toggleAudio);
   }
   
   if (volumeSlider) {
@@ -433,6 +428,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const target = e.target as HTMLInputElement;
       setVolume(parseFloat(target.value));
     });
+    
     volumeSlider.addEventListener('keydown', (e) => {
       if (e.code === 'Space') {
         e.preventDefault();
@@ -441,9 +437,9 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
   }
-  
-  updateAudioUI();
-  
+}
+
+function setupAudioContext() {
   const enableAudio = () => {
     audioManager.enableAudio();
     document.removeEventListener('click', enableAudio);
@@ -452,4 +448,12 @@ document.addEventListener('DOMContentLoaded', () => {
   
   document.addEventListener('click', enableAudio);
   document.addEventListener('keydown', enableAudio);
+}
+
+// Initialize the game when DOM is ready
+document.addEventListener('DOMContentLoaded', () => {
+  setupEventListeners();
+  setupAudioControls();
+  setupAudioContext();
+  updateAudioUI();
 });

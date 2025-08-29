@@ -5,6 +5,15 @@ import { AudioManager } from './AudioManager';
 import type { Dir, Point } from './types';
 
 export class GameState {
+  private static readonly INVERT_DURATION = 30_000;
+  private static readonly SHIELD_DURATION = 20_000;
+  private static readonly DOUBLE_POINTS_DURATION = 15_000;
+  private static readonly MIN_SPEED_MS = 70;
+  private static readonly MAX_SPEED_MS = 200;
+  private static readonly SPEED_MULTIPLIER = 0.75;
+  private static readonly SPEED_INCREASE_MULTIPLIER = 0.85;
+  private static readonly SPEED_DECREASE_MULTIPLIER = 1.2;
+  
   private score = 0;
   private alive = true;
   private speedMs: number;
@@ -16,12 +25,10 @@ export class GameState {
   private board: Board;
   private audioManager: AudioManager;
   
-  // New properties for enhanced food effects
   private shieldActive = false;
   private shieldUntil = 0;
   private doublePointsUntil = 0;
   
-  // Pause management
   private pauseStartTime = 0;
   private totalPauseTime = 0;
 
@@ -69,10 +76,9 @@ export class GameState {
     const adjustedNow = this.getAdjustedTime(now);
     let finalSpeed = this.speedMs;
     
-    // Apply speed effects only if shield is not active
     if (!this.shieldActive || adjustedNow >= this.shieldUntil) {
       if (adjustedNow < this.invertUntil) {
-        finalSpeed = Math.max(70, Math.floor(this.speedMs * 0.75));
+        finalSpeed = Math.max(GameState.MIN_SPEED_MS, Math.floor(this.speedMs * GameState.SPEED_MULTIPLIER));
       }
     }
     
@@ -133,29 +139,29 @@ export class GameState {
     switch (food.kind) {
       case 'mushroom':
         if (!this.shieldActive || now >= this.shieldUntil) {
-          this.invertUntil = now + 30_000; 
+          this.invertUntil = now + GameState.INVERT_DURATION; 
         } else {
           this.audioManager.playSound('heal');
         }
         break;
       case 'pizza':
         if (!this.shieldActive || now >= this.shieldUntil) {
-          this.speedMs = Math.max(80, Math.floor(this.speedMs * 0.85));
+          this.speedMs = Math.max(GameState.MIN_SPEED_MS, Math.floor(this.speedMs * GameState.SPEED_INCREASE_MULTIPLIER));
         } else {
           this.audioManager.playSound('heal');
         }
         break;
       case 'banana':
         if (!this.shieldActive || now >= this.shieldUntil) {
-          this.speedMs = Math.min(200, Math.floor(this.speedMs * 1.2)); 
+          this.speedMs = Math.min(GameState.MAX_SPEED_MS, Math.floor(this.speedMs * GameState.SPEED_DECREASE_MULTIPLIER)); 
         }
         break;
       case 'pineapple':
-        this.doublePointsUntil = now + 15_000; 
+        this.doublePointsUntil = now + GameState.DOUBLE_POINTS_DURATION; 
         break;
       case 'coconut':
         this.shieldActive = true;
-        this.shieldUntil = now + 20_000; 
+        this.shieldUntil = now + GameState.SHIELD_DURATION; 
         break;
     }
   }
@@ -174,6 +180,7 @@ export class GameState {
     this.snake = new Snake(start, startDir);
     this.foods = new FoodManager();
     this.spawnFood();
+    
     this.audioManager.playSound('gameStart');
   }
 

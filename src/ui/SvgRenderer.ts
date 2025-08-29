@@ -49,7 +49,6 @@ export class SvgRenderer {
   private addSnakeGradients() {
     const defs = this.svg.append('defs');
     
-    // Snake head gradient
     defs.append('linearGradient')
       .attr('id', 'snakeHead')
       .attr('x1', '0%').attr('y1', '0%')
@@ -63,7 +62,6 @@ export class SvgRenderer {
       .attr('offset', d => d.offset)
       .attr('stop-color', d => d.color);
 
-    // Snake body gradient
     defs.append('linearGradient')
       .attr('id', 'snakeBody')
       .attr('x1', '0%').attr('y1', '0%')
@@ -81,7 +79,6 @@ export class SvgRenderer {
   renderGrid() {
     const w = this.cols * this.cell, h = this.rows * this.cell;
     
-    // Add white border around playable area
     this.grid.selectAll('rect.border').remove();
     this.grid.append('rect')
       .attr('class', 'border')
@@ -107,14 +104,14 @@ export class SvgRenderer {
 
   renderFoods(food: Food | null) {
     const data = food ? [food] : [];
-    const sel = this.foods.selectAll<SVGTextElement, Food>('text.food').data(data, d => `${d.pos.x},${d.pos.y}`);
-    sel.exit().remove();
-    sel.enter().append('text')
+    const foodSelection = this.foods.selectAll<SVGTextElement, Food>('text.food').data(data, d => `${d.pos.x},${d.pos.y}`);
+    foodSelection.exit().remove();
+    foodSelection.enter().append('text')
       .attr('class', 'food')
       .attr('text-anchor', 'middle').attr('dominant-baseline', 'middle')
       .attr('font-size', this.cell * 0.9)
       .style('filter', 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))')
-      .merge(sel as any)
+      .merge(foodSelection as any)
       .text(d => emoji(d.kind))
       .attr('x', d => d.pos.x * this.cell + this.cell/2)
       .attr('y', d => d.pos.y * this.cell + this.cell/2);
@@ -177,7 +174,6 @@ export class SvgRenderer {
           rightEyeX = headX + 6; rightEyeY = headY + 6;
       }
       
-      // Add left eye
       this.snake.append('circle')
         .attr('class', 'eye')
         .attr('cx', leftEyeX)
@@ -187,7 +183,6 @@ export class SvgRenderer {
         .attr('stroke', '#fff')
         .attr('stroke-width', 1.5);
       
-      // Add right eye
       this.snake.append('circle')
         .attr('class', 'eye')
         .attr('cx', rightEyeX)
