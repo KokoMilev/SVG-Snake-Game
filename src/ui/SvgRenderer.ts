@@ -1,8 +1,7 @@
 import { select } from 'd3-selection';
 import type { Selection } from 'd3-selection';
 import 'd3-transition';
-import type { Point } from '../domain/types';
-import type { Food } from '../domain/FoodManager';
+import type { Point, Food } from '../domain/types';
 import { emoji } from '../domain/FoodManager';
 
 export class SvgRenderer {

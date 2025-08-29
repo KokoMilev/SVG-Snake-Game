@@ -1,13 +1,25 @@
-import type { Point } from './types';
+import type { Point, Food, FoodKind } from './types';
 import { Board } from './Board';
-
-export type FoodKind = 'cherry' | 'mushroom' | 'pizza';
-export type Food = { pos: Point; kind: FoodKind; value: number };
 
 export function emoji(kind: FoodKind) {
   if (kind === 'cherry') return '🍒';
   if (kind === 'mushroom') return '🍄';
-  return '🍕';
+  if (kind === 'pizza') return '🍕';
+  if (kind === 'banana') return '🍌';
+  if (kind === 'coconut') return '🥥';
+  return '🍍';
+}
+
+export function getFoodEffect(kind: FoodKind): string | undefined {
+  const effects: Record<FoodKind, string | undefined> = {
+    cherry: undefined,
+    mushroom: 'invert',
+    pizza: 'speedup',
+    banana: 'slowdown',
+    coconut: 'shield',
+    pineapple: 'doublePoints'
+  };
+  return effects[kind];
 }
 
 export class FoodManager {
@@ -25,9 +37,32 @@ export class FoodManager {
 
     const pos = cells[Math.floor(Math.random() * cells.length)];
     const r = Math.random();
-    const kind: FoodKind = r < 0.5 ? 'cherry' : r < 0.85 ? 'pizza' : 'mushroom';
-    const value = kind === 'cherry' ? 100 : kind === 'mushroom' ? 350 : 400;
-    this.food = { pos, kind, value };
+    
+    // Updated food spawning logic with new foods
+    let kind: FoodKind;
+    let value: number;
+    
+    if (r < 0.25) {
+      kind = 'cherry';
+      value = 100;
+    } else if (r < 0.50) {
+      kind = 'banana';
+      value = 120;
+    } else if (r < 0.60) {
+      kind = 'coconut';
+      value = 150;
+    } else if (r < 0.70) {
+      kind = 'pineapple';
+      value = 200;
+    } else if (r < 0.85) {
+      kind = 'pizza';
+      value = 400;
+    } else {
+      kind = 'mushroom';
+      value = 350;
+    }
+    
+    this.food = { pos, kind, value, effect: getFoodEffect(kind) };
   }
 
   getFood() { return this.food; }

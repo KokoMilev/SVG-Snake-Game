@@ -41,6 +41,67 @@ function hideOverlay() {
   overlay.classList.remove('show');
 }
 
+function showCurrentEffects() {
+  const now = Date.now();
+  const effects: string[] = [];
+  
+  // Check for active effects using adjusted time
+  const adjustedNow = now - state.getTotalPauseTime();
+  
+  if (adjustedNow < state.getInvertUntil()) {
+    effects.push('🔄 Invert');
+  }
+  if (adjustedNow < state.getShieldUntil()) {
+    effects.push('🛡️ Shield');
+  }
+  if (adjustedNow < state.getDoublePointsUntil()) {
+    effects.push('⚡ 2x Points');
+  }
+  
+  // Update effects display
+  const effectsEl = document.getElementById('effects');
+  if (effectsEl) {
+    if (effects.length > 0) {
+      effectsEl.innerHTML = effects.map(effect => `<div class="effect">${effect}</div>`).join('');
+      effectsEl.style.display = 'block';
+    } else {
+      effectsEl.style.display = 'none';
+    }
+  }
+}
+
+function updateEffectsDisplay() {
+  // Only update effects if the game is not paused
+  if (paused) return;
+  
+  const now = Date.now();
+  const effects: string[] = [];
+  
+  // Check for active effects using adjusted time
+  const adjustedNow = now - state.getTotalPauseTime();
+  
+  if (adjustedNow < state.getInvertUntil()) {
+    effects.push('🔄 Invert');
+  }
+  if (adjustedNow < state.getShieldUntil()) {
+    effects.push('🛡️ Shield');
+  }
+  if (adjustedNow < state.getDoublePointsUntil()) {
+    effects.push('⚡ 2x Points');
+  }
+  
+  // Update effects display
+  const effectsEl = document.getElementById('effects');
+  if (effectsEl) {
+    if (effects.length > 0) {
+      effectsEl.innerHTML = effects.map(effect => `<div class="effect">${effect}</div>`).join('');
+      effectsEl.style.display = 'block';
+    } else {
+      effectsEl.style.display = 'none';
+    }
+  }
+}
+
 let paused = true;
 let timer: number | null = null;
 
@@ -51,6 +112,9 @@ function loop() {
   renderer.renderFoods(state.getFood());  
   renderer.renderSnake(state.getSnakeBody());
   scoreEl.textContent = String(state.getScore());
+  
+  // Update effects display
+  updateEffectsDisplay();
 
   if (!state.isAlive()) {
     updateHighScore(state.getScore());
@@ -70,6 +134,7 @@ function start() {
   if (!state.isAlive()) return; // require restart if dead
   if (!paused) return;
   paused = false;
+  state.resume(Date.now());
   hideOverlay();
   scheduleNext(Date.now());
 }
@@ -78,13 +143,16 @@ function pause() {
   if (!state.isAlive()) return;
   paused = true;
   if (timer !== null) { clearTimeout(timer); timer = null; }
+  state.pause(Date.now());
   showOverlay('Paused — Press Space to Resume');
+  // Show current effects state when paused
+  showCurrentEffects();
 }
 
 function restart() {
   paused = true;
   if (timer !== null) { clearTimeout(timer); timer = null; }
-  state.reset({ x: Math.floor(COLS/3), y: Math.floor(ROWS/2) }, 'right', 140);
+  state.reset({ x: Math.floor(COLS/3), y: Math.floor(ROWS/2) }, 'right');
   renderer.renderFoods(state.getFood());
   renderer.renderSnake(state.getSnakeBody());
   scoreEl.textContent = '0';
