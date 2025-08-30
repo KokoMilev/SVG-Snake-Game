@@ -1,5 +1,6 @@
 import type { Point, Food, FoodKind } from './types';
 import { Board } from './Board';
+import { FOOD_CONFIG } from './constants';
 
 export function emoji(kind: FoodKind) {
   if (kind === 'cherry') return '🍒';
@@ -36,33 +37,43 @@ export class FoodManager {
     if (cells.length === 0) { this.food = null; return; }
 
     const pos = cells[Math.floor(Math.random() * cells.length)];
+    const foodType = this.selectRandomFoodType();
+    
+    this.food = { 
+      pos, 
+      kind: foodType.kind, 
+      value: foodType.value, 
+      effect: getFoodEffect(foodType.kind) 
+    };
+  }
+
+  private selectRandomFoodType(): { kind: FoodKind; value: number } {
     const r = Math.random();
+    let cumulativeProbability = 0;
     
-    // Updated food spawning logic with new foods
-    let kind: FoodKind;
-    let value: number;
+    const foodTypes: Array<{ kind: FoodKind; probability: number }> = [
+      { kind: 'cherry', probability: FOOD_CONFIG.SPAWN_PROBABILITIES.cherry },
+      { kind: 'banana', probability: FOOD_CONFIG.SPAWN_PROBABILITIES.banana },
+      { kind: 'coconut', probability: FOOD_CONFIG.SPAWN_PROBABILITIES.coconut },
+      { kind: 'pineapple', probability: FOOD_CONFIG.SPAWN_PROBABILITIES.pineapple },
+      { kind: 'pizza', probability: FOOD_CONFIG.SPAWN_PROBABILITIES.pizza },
+      { kind: 'mushroom', probability: FOOD_CONFIG.SPAWN_PROBABILITIES.mushroom }
+    ];
     
-    if (r < 0.25) {
-      kind = 'cherry';
-      value = 100;
-    } else if (r < 0.50) {
-      kind = 'banana';
-      value = 120;
-    } else if (r < 0.60) {
-      kind = 'coconut';
-      value = 150;
-    } else if (r < 0.70) {
-      kind = 'pineapple';
-      value = 200;
-    } else if (r < 0.85) {
-      kind = 'pizza';
-      value = 400;
-    } else {
-      kind = 'mushroom';
-      value = 350;
+    for (const foodType of foodTypes) {
+      cumulativeProbability += foodType.probability;
+      if (r < cumulativeProbability) {
+        return {
+          kind: foodType.kind,
+          value: FOOD_CONFIG.VALUES[foodType.kind]
+        };
+      }
     }
     
-    this.food = { pos, kind, value, effect: getFoodEffect(kind) };
+    return {
+      kind: 'mushroom',
+      value: FOOD_CONFIG.VALUES.mushroom
+    };
   }
 
   getFood() { return this.food; }

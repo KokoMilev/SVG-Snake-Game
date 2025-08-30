@@ -1,10 +1,10 @@
 @media (max-width: 920px) {
-  .start-content, .game-over-content {
+  .start-content, .game-over-content, .skins-content {
     padding: 40px 30px;
     max-width: 90vw;
   }
   
-  .start-header h1, .game-over-header h1 {
+  .start-header h1, .game-over-header h1, .skins-header h1 {
     font-size: 2.8rem;
   }
   
@@ -25,12 +25,12 @@
     font-size: 1.1rem;
   }
   
-  .menu-content {
+  .menu-content, .skins-content {
     max-width: 95vw;
     max-height: 95vh;
   }
   
-  .menu-header h1 {
+  .menu-header h1, .skins-header h1 {
     font-size: 2rem;
   }
   
@@ -42,7 +42,7 @@
     grid-template-columns: 1fr;
   }
   
-  .food-grid {
+  .food-grid, .skins-grid {
     grid-template-columns: 1fr;
   }
   
@@ -54,6 +54,11 @@
   
   .food-emoji {
     font-size: 2.5rem;
+  }
+  
+  .skins-grid {
+    max-height: 50vh;
+    padding: 20px;
   }
   
   #effects {
@@ -95,11 +100,11 @@
 }
 
 @media (max-width: 700px) {
-  .start-content, .game-over-content {
+  .start-content, .game-over-content, .skins-content {
     padding: 30px 20px;
   }
 
-  .start-header h1, .game-over-header h1 {
+  .start-header h1, .game-over-header h1, .skins-header h1 {
     font-size: 1.5rem;
   }
   
@@ -166,11 +171,11 @@
     padding: 2px 5px;
   }
   
-  .menu-header {
+  .menu-header, .skins-header {
     padding: 20px;
   }
   
-  .menu-header h1 {
+  .menu-header h1, .skins-header h1 {
     font-size: 1.8rem;
   }
   
@@ -206,10 +211,20 @@
   .food-item {
     padding: 2px;
   }
+  
+  .skins-grid {
+    padding: 15px;
+    gap: 15px;
+    max-height: 45vh;
+  }
+  
+  .skin-item {
+    padding: 15px;
+  }
 }
 
 @media (max-width: 360px) {
-  .start-header h1, .game-over-header h1 {
+  .start-header h1, .game-over-header h1, .skins-header h1 {
     font-size: 1.3rem;
   }
   
@@ -260,7 +275,7 @@
     padding: 3px 4px;
   }
   
-  .menu-header h1 {
+  .menu-header h1, .skins-header h1 {
     font-size: 1.6rem;
   }
   
@@ -279,5 +294,15 @@
   
   .food-item {
     padding: 0px;
+  }
+  
+  .skins-grid {
+    padding: 10px;
+    gap: 10px;
+    max-height: 40vh;
+  }
+  
+  .skin-item {
+    padding: 10px;
   }
 }

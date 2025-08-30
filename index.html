@@ -38,12 +38,14 @@
         
         <div class="start-buttons">
           <button id="startGameBtn" class="btn btn-primary">🎮 Start Game</button>
+          <button id="skinsBtn" class="btn btn-secondary">🎨 Skins</button>
           <button id="rulesBtn" class="btn btn-secondary">📖 Rules & Tips</button>
         </div>
         
         <div class="start-footer">
           <p>Press <kbd>Space</kbd> to start quickly</p>
           <p>Press <kbd>ESC</kbd> anytime for menu</p>
+          <p>Press <kbd>M</kbd> anytime to mute/unmute sounds</p>
         </div>
       </div>
     </div>
@@ -67,6 +69,49 @@
         <div class="game-over-footer">
           <p>Press <kbd>Space</kbd> to play again quickly</p>
           <p>Press <kbd>ESC</kbd> for rules & tips</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Skins Overlay -->
+    <div id="skinsScreen" class="skins-overlay">
+      <div class="skins-content">
+        <div class="skins-header">
+          <h1>🎨 Snake Skins</h1>
+          <button id="closeSkins" class="close-btn">×</button>
+        </div>
+        
+        <div class="skins-grid">
+          <div class="skin-item unlocked" data-skin="basic">
+            <div class="skin-preview basic-skin"></div>
+            <div class="skin-info">
+              <h3>Basic Snake</h3>
+              <p>Classic green snake</p>
+              <div class="skin-status">✅ Unlocked</div>
+            </div>
+          </div>
+          
+          <div class="skin-item locked" data-skin="golden">
+            <div class="skin-preview golden-skin"></div>
+            <div class="skin-info">
+              <h3>Golden Snake</h3>
+              <p>Shiny golden appearance</p>
+              <div class="skin-status">🔒 Score 5000+ to unlock</div>
+            </div>
+          </div>
+          
+          <div class="skin-item locked" data-skin="neon">
+            <div class="skin-preview neon-skin"></div>
+            <div class="skin-info">
+              <h3>Neon Snake</h3>
+              <p>Bright neon blue glow</p>
+              <div class="skin-status">🔒 Score 10000+ to unlock</div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="skins-footer">
+          <button id="backToMenu" class="btn btn-secondary">Back to Menu</button>
         </div>
       </div>
     </div>

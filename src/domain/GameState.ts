@@ -3,17 +3,9 @@ import { Snake } from './Snake';
 import { FoodManager } from './FoodManager';
 import { AudioManager } from './AudioManager';
 import type { Dir, Point } from './types';
+import { GAME_TIMING, GAME_CONFIG } from './constants';
 
 export class GameState {
-  private static readonly INVERT_DURATION = 30_000;
-  private static readonly SHIELD_DURATION = 20_000;
-  private static readonly DOUBLE_POINTS_DURATION = 15_000;
-  private static readonly MIN_SPEED_MS = 70;
-  private static readonly MAX_SPEED_MS = 200;
-  private static readonly SPEED_MULTIPLIER = 0.75;
-  private static readonly SPEED_INCREASE_MULTIPLIER = 0.85;
-  private static readonly SPEED_DECREASE_MULTIPLIER = 1.2;
-  
   private score = 0;
   private alive = true;
   private speedMs: number;
@@ -78,7 +70,7 @@ export class GameState {
     
     if (!this.shieldActive || adjustedNow >= this.shieldUntil) {
       if (adjustedNow < this.invertUntil) {
-        finalSpeed = Math.max(GameState.MIN_SPEED_MS, Math.floor(this.speedMs * GameState.SPEED_MULTIPLIER));
+        finalSpeed = Math.max(GAME_TIMING.MIN_SPEED_MS, Math.floor(this.speedMs * GAME_TIMING.SPEED_MULTIPLIER));
       }
     }
     
@@ -139,29 +131,29 @@ export class GameState {
     switch (food.kind) {
       case 'mushroom':
         if (!this.shieldActive || now >= this.shieldUntil) {
-          this.invertUntil = now + GameState.INVERT_DURATION; 
+          this.invertUntil = now + GAME_TIMING.INVERT_DURATION; 
         } else {
           this.audioManager.playSound('heal');
         }
         break;
       case 'pizza':
         if (!this.shieldActive || now >= this.shieldUntil) {
-          this.speedMs = Math.max(GameState.MIN_SPEED_MS, Math.floor(this.speedMs * GameState.SPEED_INCREASE_MULTIPLIER));
+          this.speedMs = Math.max(GAME_TIMING.MIN_SPEED_MS, Math.floor(this.speedMs * GAME_TIMING.SPEED_INCREASE_MULTIPLIER));
         } else {
           this.audioManager.playSound('heal');
         }
         break;
       case 'banana':
         if (!this.shieldActive || now >= this.shieldUntil) {
-          this.speedMs = Math.min(GameState.MAX_SPEED_MS, Math.floor(this.speedMs * GameState.SPEED_DECREASE_MULTIPLIER)); 
+          this.speedMs = Math.min(GAME_TIMING.MAX_SPEED_MS, Math.floor(this.speedMs * GAME_TIMING.SPEED_DECREASE_MULTIPLIER)); 
         }
         break;
       case 'pineapple':
-        this.doublePointsUntil = now + GameState.DOUBLE_POINTS_DURATION; 
+        this.doublePointsUntil = now + GAME_TIMING.DOUBLE_POINTS_DURATION; 
         break;
       case 'coconut':
         this.shieldActive = true;
-        this.shieldUntil = now + GameState.SHIELD_DURATION; 
+        this.shieldUntil = now + GAME_TIMING.SHIELD_DURATION; 
         break;
     }
   }
@@ -169,7 +161,7 @@ export class GameState {
   reset(start: Point, startDir: Dir) {
     this.score = 0; 
     this.alive = true; 
-    this.speedMs = this.baseSpeedMs;
+    this.speedMs = GAME_CONFIG.BASE_TICK_MS;
     this.invertUntil = 0;
     this.canTurn = true;
     this.shieldActive = false;

@@ -1,14 +1,13 @@
 import { select } from 'd3-selection';
 import type { Selection } from 'd3-selection';
-import 'd3-transition';
-import type { Point, Food } from '../domain/types';
+import type { Food, Point, Skin, GradientStop } from '../domain/types';
 import { emoji } from '../domain/FoodManager';
 
 export class SvgRenderer {
-  private host: HTMLElement;
   private cols: number;
   private rows: number;
   private cell: number;
+  private currentSkin: Skin = 'basic';
 
   private svg: Selection<SVGSVGElement, unknown, null, undefined>;
   private grid: Selection<SVGGElement, unknown, null, undefined>;
@@ -16,64 +15,87 @@ export class SvgRenderer {
   private snake: Selection<SVGGElement, unknown, null, undefined>;
 
   constructor(host: HTMLElement, cols: number, rows: number, cell = 20) {
-    this.host = host;
     this.cols = cols;
     this.rows = rows;
     this.cell = cell;
 
-    const w = this.cols * this.cell;
-    const h = this.rows * this.cell;
+    this.svg = select(host).append('svg')
+      .attr('width', cols * cell)
+      .attr('height', rows * cell)
+      .style('background', 'transparent');
 
-    this.svg = select(this.host)
-      .append('svg')
-      .attr('viewBox', `0 0 ${w} ${h}`)
-      .attr('preserveAspectRatio', 'xMidYMid meet')
-      .style('border', 'none')
-      .style('background', 'transparent')
-      .style('width', '100%')
-      .style('height', '100%')
-      .style('max-width', 'min(90vw, 90vh)')
-      .style('max-height', 'min(90vw, 90vh)')
-      .style('display', 'block')
-      .style('border-radius', '8px')
-      .style('box-shadow', 'none');
+    this.grid = this.svg.append('g').attr('class', 'grid');
+    this.foods = this.svg.append('g').attr('class', 'foods');
+    this.snake = this.svg.append('g').attr('class', 'snake');
 
-    this.grid  = this.svg.append('g').attr('data-layer', 'grid');
-    this.foods = this.svg.append('g').attr('data-layer', 'foods');
-    this.snake = this.svg.append('g').attr('data-layer', 'snake');
-
-    this.renderGrid();
     this.addSnakeGradients();
+    this.renderGrid();
   }
 
-  private addSnakeGradients() {
+  setSkin(skin: Skin): void {
+    this.currentSkin = skin;
+    this.addSnakeGradients();
+    const currentSnakeData = this.snake.selectAll('*').data() as Point[];
+    this.renderSnake(currentSnakeData || []);
+  }
+
+  private addSnakeGradients(): void {
+    this.svg.selectAll('defs').remove();
+    
     const defs = this.svg.append('defs');
     
-    defs.append('linearGradient')
-      .attr('id', 'snakeHead')
-      .attr('x1', '0%').attr('y1', '0%')
-      .attr('x2', '100%').attr('y2', '100%')
-      .selectAll('stop')
-      .data([
-        { offset: '0%', color: '#66BB6A' },
-        { offset: '100%', color: '#4CAF50' }
-      ])
-      .enter().append('stop')
-      .attr('offset', d => d.offset)
-      .attr('stop-color', d => d.color);
+    const skinGradients = this.getSkinGradients();
+    this.createGradient(defs, 'snakeHead', skinGradients.head);
+    this.createGradient(defs, 'snakeBody', skinGradients.body);
+  }
 
+  private getSkinGradients(): { head: GradientStop[]; body: GradientStop[] } {
+    const gradients = {
+      basic: {
+        head: [
+          { offset: '0%', color: '#66BB6A' },
+          { offset: '100%', color: '#4CAF50' }
+        ],
+        body: [
+          { offset: '0%', color: '#81C784' },
+          { offset: '100%', color: '#66BB6A' }
+        ]
+      },
+      golden: {
+        head: [
+          { offset: '0%', color: '#FFD700' },
+          { offset: '100%', color: '#FFA500' }
+        ],
+        body: [
+          { offset: '0%', color: '#FFA500' },
+          { offset: '100%', color: '#FF8C00' }
+        ]
+      },
+      neon: {
+        head: [
+          { offset: '0%', color: '#00FFFF' },
+          { offset: '100%', color: '#0080FF' }
+        ],
+        body: [
+          { offset: '0%', color: '#0080FF' },
+          { offset: '100%', color: '#0040FF' }
+        ]
+      }
+    };
+
+    return gradients[this.currentSkin];
+  }
+
+  private createGradient(defs: Selection<SVGDefsElement, unknown, null, undefined>, id: string, stops: GradientStop[]): void {
     defs.append('linearGradient')
-      .attr('id', 'snakeBody')
+      .attr('id', id)
       .attr('x1', '0%').attr('y1', '0%')
       .attr('x2', '100%').attr('y2', '100%')
       .selectAll('stop')
-      .data([
-        { offset: '0%', color: '#81C784' },
-        { offset: '100%', color: '#66BB6A' }
-      ])
+      .data(stops)
       .enter().append('stop')
-      .attr('offset', d => d.offset)
-      .attr('stop-color', d => d.color);
+      .attr('offset', (d: GradientStop) => d.offset)
+      .attr('stop-color', (d: GradientStop) => d.color);
   }
 
   renderGrid() {

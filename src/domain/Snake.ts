@@ -23,7 +23,7 @@ export class Snake {
     if (this.dir === 'up')    return { x: h.x,     y: h.y - 1 };
     if (this.dir === 'down')  return { x: h.x,     y: h.y + 1 };
     if (this.dir === 'left')  return { x: h.x - 1, y: h.y     };
-    return                       { x: h.x + 1, y: h.y     }; // right
+    return { x: h.x + 1, y: h.y }; 
   }
 
   move(grow: boolean) {
