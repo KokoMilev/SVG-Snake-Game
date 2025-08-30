@@ -7,6 +7,38 @@ export const GAME_CONFIG = {
   START_POSITION: { x: 6, y: 7 }
 } as const;
 
+export const getResponsiveBoardConfig = () => {
+  const screenWidth = window.innerWidth;
+  const screenHeight = window.innerHeight;
+  
+  let cols: number = GAME_CONFIG.COLS;
+  let rows: number = GAME_CONFIG.ROWS;
+  let cellSize: number = GAME_CONFIG.CELL_SIZE;
+  
+  if (screenWidth <= 480 && screenHeight > screenWidth) {
+    cols = 16;
+    rows = 12;
+    cellSize = 17;
+  }
+  else if (screenWidth <= 768) {
+    cols = 18;
+    rows = 14;
+    cellSize = 22;
+  }
+  else if (screenWidth <= 1024) {
+    cols = 19;
+    rows = 14;
+    cellSize = 28;
+  }
+  else {
+    cols = GAME_CONFIG.COLS;
+    rows = GAME_CONFIG.ROWS;
+    cellSize = GAME_CONFIG.CELL_SIZE;
+  }
+  
+  return { cols, rows, cellSize };
+};
+
 export const SKIN_UNLOCK_THRESHOLDS = {
   basic: 0,
   golden: 5000,

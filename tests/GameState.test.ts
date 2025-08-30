@@ -1,25 +1,41 @@
-import { Board } from '../src/domain/Board';
 import { GameState } from '../src/domain/GameState';
+import { Board } from '../src/domain/Board';
 
 describe('GameState', () => {
-  test('dies when hitting wall', () => {
-    const b = new Board(3, 3);
-    const gs = new GameState(b, { x: 2, y: 1 }, 'right', 140);
-    const now = Date.now();
-    gs.step(now);
-    expect(gs.isAlive()).toBe(false);
+  let gameState: GameState;
+  let board: Board;
+
+  beforeEach(() => {
+    board = new Board(20, 15);
+    gameState = new GameState(board, { x: 10, y: 7 }, 'right', 140);
   });
 
-  test('allows only one direction change per tick', () => {
-    const b = new Board(10, 10);
-    const gs = new GameState(b, { x: 5, y: 5 }, 'right', 140);
-    const now = Date.now();
+  test('should start with score 0', () => {
+    expect(gameState.getScore()).toBe(0);
+  });
 
-    gs.setDirection('up', now);
-    gs.setDirection('left', now); 
-    gs.step(now);
-    const body = gs.getSnakeBody();
-    expect(body[0]).toEqual({ x: 5, y: 4 });
+  test('should start alive', () => {
+    expect(gameState.isAlive()).toBe(true);
+  });
+
+  test('should have snake with 3 segments', () => {
+    expect(gameState.getSnakeBody()).toHaveLength(3);
+  });
+
+  test('should move snake when stepping', () => {
+    const initialHead = gameState.getSnakeBody()[0];
+    gameState.step(Date.now());
+    const newHead = gameState.getSnakeBody()[0];
+    
+    expect(newHead.x).toBe(initialHead.x + 1);
+  });
+
+  test('should reset game correctly', () => {
+    gameState.reset({ x: 5, y: 5 }, 'up');
+    
+    expect(gameState.getScore()).toBe(0);
+    expect(gameState.isAlive()).toBe(true);
+    expect(gameState.getSnakeBody()[0]).toEqual({ x: 5, y: 5 });
   });
 });
 

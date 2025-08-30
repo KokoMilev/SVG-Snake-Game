@@ -223,6 +223,74 @@
   }
 }
 
+@media (max-width: 480px) {
+  /* Game board responsive adjustments for small mobile devices */
+  #game {
+    padding: 10px;
+  }
+  
+  #game svg {
+    max-width: calc(100vw - 40px);
+    max-height: calc(100vh - 200px);
+  }
+  
+  .start-content, .game-over-content, .skins-content {
+    padding: 25px 15px;
+    max-width: 95vw;
+  }
+  
+  .start-header h1, .game-over-header h1, .skins-header h1 {
+    font-size: 1.3rem;
+  }
+  
+  .subtitle {
+    font-size: 0.75rem;
+    margin-bottom: 25px;
+  }
+  
+  .btn {
+    padding: 12px 25px;
+    font-size: 0.9rem;
+  }
+  
+  #hud {
+    top: 2px;
+    padding: 6px 10px;
+    gap: 8px;
+  }
+  
+  #scoreBox {
+    font-size: 0.9rem;
+  }
+  
+  #effects {
+    max-width: 160px;
+    gap: 1px;
+    padding: 4px;
+  }
+  
+  .effect {
+    font-size: 6px;
+    padding: 1px 3px;
+  }
+  
+  #audioControls {
+    gap: 8px;
+  }
+  
+  .audio-btn {
+    width: 30px;
+    height: 30px;
+    font-size: 14px;
+  }
+  
+  .volume-control input[type="range"] {
+    width: 50px;
+  }
+}
+
+
+
 @media (max-width: 360px) {
   .start-header h1, .game-over-header h1, .skins-header h1 {
     font-size: 1.3rem;

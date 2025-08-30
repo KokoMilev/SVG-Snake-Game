@@ -4,6 +4,7 @@ import type { Dir, Skin } from '../domain/types';
 import { SvgRenderer } from '../ui/SvgRenderer';
 import { 
   GAME_CONFIG, 
+  getResponsiveBoardConfig,
   SKIN_UNLOCK_THRESHOLDS, 
   STORAGE_KEYS 
 } from '../domain/constants';
@@ -59,13 +60,65 @@ let renderer: SvgRenderer;
 
 try {
   validateGameConfig();
-  board = new Board(GAME_CONFIG.COLS, GAME_CONFIG.ROWS);
+  const responsiveConfig = getResponsiveBoardConfig();
+  board = new Board(responsiveConfig.cols, responsiveConfig.rows);
   state = new GameState(board, GAME_CONFIG.START_POSITION, 'right', GAME_CONFIG.BASE_TICK_MS);
-  renderer = new SvgRenderer(getRequiredElement('#game', 'game container'), GAME_CONFIG.COLS, GAME_CONFIG.ROWS, GAME_CONFIG.CELL_SIZE);
+  renderer = new SvgRenderer(getRequiredElement('#game', 'game container'), responsiveConfig.cols, responsiveConfig.rows, responsiveConfig.cellSize);
 } catch (error) {
   console.error('Failed to initialize game:', error);
   throw error;
 }
+
+// Add window resize handler for responsive board
+let resizeTimeout: number;
+window.addEventListener('resize', () => {
+  clearTimeout(resizeTimeout);
+  resizeTimeout = window.setTimeout(() => {
+    try {
+      const newConfig = getResponsiveBoardConfig();
+      const currentConfig = { cols: board.getWidth(), rows: board.getHeight() };
+      
+      // Only resize if dimensions actually changed
+      if (newConfig.cols !== currentConfig.cols || newConfig.rows !== currentConfig.rows) {
+        // Stop any currently playing background music before creating new state
+        audioManager.stopBackgroundMusic();
+        
+        // Create new board and game state with new dimensions
+        const newBoard = new Board(newConfig.cols, newConfig.rows);
+        const newState = new GameState(newBoard, GAME_CONFIG.START_POSITION, 'right', GAME_CONFIG.BASE_TICK_MS);
+        
+        // Update references
+        board = newBoard;
+        state = newState;
+        
+        // Update audio manager reference to use the new state's audio manager
+        const newAudioManager = state.getAudioManager();
+        if (newAudioManager) {
+          // Apply current audio settings to the new audio manager
+          if (!audioSettings.enabled) {
+            newAudioManager.mute();
+          }
+          newAudioManager.setVolume(audioSettings.volume);
+          
+          // Update the global audio manager reference
+          audioManager = newAudioManager;
+        }
+        
+        // Resize the renderer
+        renderer.resize(newConfig.cols, newConfig.rows, newConfig.cellSize);
+        
+         if (gameStarted && !paused) {
+           paused = true;
+           gameStarted = false;
+           showOverlay('Screen resized — Click Space to Restart');
+         }
+      }
+    } catch (error) {
+      console.error('Failed to resize game board:', error);
+    }
+  }, 250); // Debounce resize events
+});
+
 
 const elements: GameElements = {
   score: getRequiredElement<HTMLSpanElement>('#score', 'score display'),
@@ -89,7 +142,7 @@ const elements: GameElements = {
 
 const tabBtns = document.querySelectorAll<HTMLButtonElement>('.tab-btn');
 const tabContents = document.querySelectorAll<HTMLDivElement>('.tab-content');
-const audioManager = state.getAudioManager();
+let audioManager = state.getAudioManager();
 
 let highScore = parseInt(localStorage.getItem(STORAGE_KEYS.HIGH_SCORE) || '0');
 let audioSettings: AudioSettings = {
@@ -139,7 +192,8 @@ function hideOverlay() {
 
 function hideStartScreen() {
   elements.startScreen?.classList.add('hide');
-  audioManager.playBackgroundMusic();
+  // Play gameplay background music when starting a new game
+  audioManager.playBackgroundMusic('/src/assets/background-music.wav');
 }
 
 function showGameOver() {
@@ -147,6 +201,9 @@ function showGameOver() {
     elements.finalScore.textContent = String(state.getScore());
     elements.gameOverHighScore.textContent = String(highScore);
     elements.gameOver.classList.add('show');
+    
+    // Stop background music when player dies
+    audioManager.stopBackgroundMusic();
   }
 }
 
@@ -206,6 +263,8 @@ function updateEffects() {
 let paused = true;
 let timer: number | null = null;
 let gameStarted = false;
+let isTransitioning = false;
+let lastSpacePress = 0;
 
 function gameLoop() {
   if (paused || !state.isAlive()) return;
@@ -257,7 +316,8 @@ function restartGame() {
   resetGameState();
   hideGameOver();
   
-  audioManager.playBackgroundMusic();
+  // Play gameplay background music when restarting
+  audioManager.playBackgroundMusic('/src/assets/background-music.wav');
   startGame();
 }
 
@@ -268,6 +328,9 @@ function returnToMainMenu() {
   resetGameState();
   hideGameOver();
   
+  // Stop background music when returning to start screen
+  audioManager.stopBackgroundMusic();
+  
   if (elements.startScreen) {
     elements.startScreen.style.transition = '';
     elements.startScreen.style.opacity = '';
@@ -277,6 +340,10 @@ function returnToMainMenu() {
 }
 
 function startNewGame() {
+  if (isTransitioning) return;
+  
+  isTransitioning = true;
+  
   if (elements.startScreen) {
     elements.startScreen.style.transition = 'opacity 0.8s ease-out, transform 0.8s ease-out';
     elements.startScreen.style.opacity = '0';
@@ -288,6 +355,7 @@ function startNewGame() {
     hideStartScreen();
     hideOverlay();
     paused = false;
+    isTransitioning = false;
     state.resume(Date.now());
     scheduleNextFrame(Date.now());
   }, GAME_CONFIG.ANIMATION_DELAY);
@@ -467,6 +535,13 @@ window.addEventListener('keydown', (e) => {
     
     const activeElement = document.activeElement;
     if (activeElement?.closest('#audioControls')) return;
+    
+    if (isTransitioning) return;
+    
+    // Debounce rapid space presses (minimum 100ms between presses)
+    const now = Date.now();
+    if (now - lastSpacePress < 100) return;
+    lastSpacePress = now;
     
     if (!gameStarted) {
       startNewGame();

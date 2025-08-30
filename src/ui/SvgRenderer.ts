@@ -22,7 +22,11 @@ export class SvgRenderer {
     this.svg = select(host).append('svg')
       .attr('width', cols * cell)
       .attr('height', rows * cell)
-      .style('background', 'transparent');
+      .style('background', 'transparent')
+      .style('max-width', '100%')
+      .style('max-height', '100%')
+      .style('width', 'auto')
+      .style('height', 'auto');
 
     this.grid = this.svg.append('g').attr('class', 'grid');
     this.foods = this.svg.append('g').attr('class', 'foods');
@@ -32,11 +36,26 @@ export class SvgRenderer {
     this.renderGrid();
   }
 
+  resize(cols: number, rows: number, cell: number): void {
+    this.cols = cols;
+    this.rows = rows;
+    this.cell = cell;
+    
+    this.svg
+      .attr('width', cols * cell)
+      .attr('height', rows * cell);
+    
+    this.addSnakeGradients();
+    this.renderGrid();
+  }
+
   setSkin(skin: Skin): void {
     this.currentSkin = skin;
     this.addSnakeGradients();
     const currentSnakeData = this.snake.selectAll('*').data() as Point[];
-    this.renderSnake(currentSnakeData || []);
+    if (currentSnakeData && currentSnakeData.length > 0 && currentSnakeData[0] && currentSnakeData[0].x !== undefined) {
+      this.renderSnake(currentSnakeData);
+    }
   }
 
   private addSnakeGradients(): void {
@@ -142,9 +161,13 @@ export class SvgRenderer {
   renderSnake(points: Point[]) {
     this.snake.selectAll('*').remove();
 
-    if (points.length === 0) return;
+    if (!points || points.length === 0) return;
 
     points.forEach((point, index) => {
+      if (!point || typeof point.x !== 'number' || typeof point.y !== 'number') {
+        return;
+      }
+      
       const isHead = index === 0;
       const x = point.x * this.cell;
       const y = point.y * this.cell;
@@ -166,7 +189,7 @@ export class SvgRenderer {
         .style('filter', 'drop-shadow(0 2px 4px rgba(0,0,0,0.2))');
     });
 
-    if (points.length > 0) {
+    if (points.length > 0 && points[0] && typeof points[0].x === 'number' && typeof points[0].y === 'number') {
       const head = points[0];
       const headX = head.x * this.cell + this.cell / 2;
       const headY = head.y * this.cell + this.cell / 2;
@@ -174,45 +197,50 @@ export class SvgRenderer {
       const direction = this.getSnakeDirection(points);
       let leftEyeX, leftEyeY, rightEyeX, rightEyeY;
       
+      const eyeOffset = Math.max(3, Math.floor(this.cell * 0.2)); 
+      
       switch (direction) {
         case 'right':
-          leftEyeX = headX + 6; leftEyeY = headY - 6;
-          rightEyeX = headX + 6; rightEyeY = headY + 6;
+          leftEyeX = headX + eyeOffset; leftEyeY = headY - eyeOffset;
+          rightEyeX = headX + eyeOffset; rightEyeY = headY + eyeOffset;
           break;
         case 'left':
-          leftEyeX = headX - 6; leftEyeY = headY - 6;
-          rightEyeX = headX - 6; rightEyeY = headY + 6;
+          leftEyeX = headX - eyeOffset; leftEyeY = headY - eyeOffset;
+          rightEyeX = headX - eyeOffset; rightEyeY = headY + eyeOffset;
           break;
         case 'up':
-          leftEyeX = headX - 6; leftEyeY = headY - 6;
-          rightEyeX = headX + 6; rightEyeY = headY - 6;
+          leftEyeX = headX - eyeOffset; leftEyeY = headY - eyeOffset;
+          rightEyeX = headX + eyeOffset; rightEyeY = headY - eyeOffset;
           break;
         case 'down':
-          leftEyeX = headX - 6; leftEyeY = headY + 6;
-          rightEyeX = headX + 6; rightEyeY = headY + 6;
+          leftEyeX = headX - eyeOffset; leftEyeY = headY + eyeOffset;
+          rightEyeX = headX + eyeOffset; rightEyeY = headY + eyeOffset;
           break;
         default:
-          leftEyeX = headX + 6; leftEyeY = headY - 6;
-          rightEyeX = headX + 6; rightEyeY = headY + 6;
+          leftEyeX = headX + eyeOffset; leftEyeY = headY - eyeOffset;
+          rightEyeX = headX + eyeOffset; rightEyeY = headY + eyeOffset;
       }
+      
+      const eyeRadius = Math.max(3, Math.floor(this.cell * 0.2)); 
+      const eyeStrokeWidth = Math.max(1, Math.floor(this.cell * 0.05)); 
       
       this.snake.append('circle')
         .attr('class', 'eye')
         .attr('cx', leftEyeX)
         .attr('cy', leftEyeY)
-        .attr('r', 6)
+        .attr('r', eyeRadius)
         .attr('fill', '#000')
         .attr('stroke', '#fff')
-        .attr('stroke-width', 1.5);
+        .attr('stroke-width', eyeStrokeWidth);
       
       this.snake.append('circle')
         .attr('class', 'eye')
         .attr('cx', rightEyeX)
         .attr('cy', rightEyeY)
-        .attr('r', 6)
+        .attr('r', eyeRadius)
         .attr('fill', '#000')
         .attr('stroke', '#fff')
-        .attr('stroke-width', 1.5);
+        .attr('stroke-width', eyeStrokeWidth);
     }
   }
 
