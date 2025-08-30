@@ -64,7 +64,6 @@ A modern, responsive Snake game built with TypeScript, SVG, and D3.js. Features 
 ## Browser Support
 
 - Modern browsers with ES6+ support
-- Mobile browsers (iOS Safari, Chrome Mobile)
 - Desktop browsers (Chrome, Firefox, Safari, Edge)
 
 ## Performance Optimizations
